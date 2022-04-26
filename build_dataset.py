@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def build_dataset():
@@ -33,7 +34,19 @@ def build_dataset():
 
     # TODO: One-hot encoding
 
-    # TODO: Split into train/dev/test (70%/20%/10%)
+    # Split into train/dev/test (60%/20%/20%)
+    train, dev, test = np.split(all_df.sample(frac=1, random_state=0),
+                                [int(0.6 * len(all_df)), int(0.8 * len(all_df))])
+
+    # Print number of examples for each split
+    print(f"Number of training examples: {train.shape[0]}")
+    print(f"Number of dev examples: {dev.shape[0]}")
+    print(f"Number of test examples: {test.shape[0]}")
+
+    # Write to CSV files
+    train.to_csv("datasets/train/train.csv", header=None, index=False)
+    dev.to_csv("datasets/dev/dev.csv", header=None, index=False)
+    test.to_csv("datasets/test/test.csv", header=None, index=False)
 
 
 if __name__ == "__main__":

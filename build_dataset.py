@@ -44,9 +44,9 @@ def build_dataset():
     print(f"Number of test examples: {test.shape[0]}")
 
     # Write to CSV files
-    train.to_csv("datasets/train/train.csv", header=None, index=False)
-    dev.to_csv("datasets/dev/dev.csv", header=None, index=False)
-    test.to_csv("datasets/test/test.csv", header=None, index=False)
+    train.to_csv("datasets/processed/train.csv", header=None, index=False)
+    dev.to_csv("datasets/processed/dev.csv", header=None, index=False)
+    test.to_csv("datasets/processed/test.csv", header=None, index=False)
 
 
 if __name__ == "__main__":

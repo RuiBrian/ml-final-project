@@ -56,8 +56,8 @@ def pr_auc(truefile,predfile):
     recall = dict()
     accuracies=[]
     for i in range(len(classes)):
-        precision[i], recall[i], _ = precision_recall_curve(true[:, i],
-                                                            pred[:, i])
+        precision[i], recall[i], _ = precision_recall_curve(labels[:, i],
+                                                            preds[:, i])
         accuracies.append(auc(precision[i],recall[i]))
     # accuracy = auc(precision, recall)
     accuracy = np.nanmean(accuracies)

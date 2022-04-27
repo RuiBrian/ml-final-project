@@ -4,7 +4,6 @@ import sys
 from sklearn.metrics import precision_recall_curve,auc
 from sklearn.preprocessing import label_binarize
 
-
 def simple_nn_accuracy(file):
     data = np.loadtxt(file, dtype=int,delimiter = ",",skiprows=1)
     true = data[:,1]
@@ -39,7 +38,7 @@ def nn_pr_auc(file):
         precision[i], recall[i], _ = precision_recall_curve(true[:, i],
                                                             pred[:, i])
         accuracies.append(auc(precision[i],recall[i]))
-    print(accuracies)
+    # print(accuracies)
     accuracy = np.nanmean(accuracies)
     # precision, recall, thresholds = precision_recall_curve(true, pred)
     # accuracy = auc(precision, recall)
@@ -63,7 +62,16 @@ def pr_auc(truefile,predfile):
     accuracy = np.nanmean(accuracies)
     return accuracy
 
-def top_k_accuracy(file):
+def nn_top_k_accuracy(file):
+    #TODO
+    """
+    Top-k accuracy is the fraction of correctly predicted splice sites 
+    at the threshold where the number of predicted sites is equal to 
+    the actual number of sites present.
+    """
+    raise NotImplementedError()
+
+def top_k_accuracy(truefile,predfile):
     #TODO
     """
     Top-k accuracy is the fraction of correctly predicted splice sites 
@@ -82,5 +90,6 @@ if __name__ == "__main__":
         if len(sys.argv) < 3:
             print("***Please provide output file for nnsplice***")
         outputfile = sys.argv[2]
-        print(f"Accuracy for {outputfile} is {simple_nn_accuracy(outputfile)*100:.3f}% and {nn_pr_auc(outputfile)} %")
-    
+        print(f"{outputfile} Accuracy is {simple_nn_accuracy(outputfile)*100:.3f}% and PR-AUC = {nn_pr_auc(outputfile)*100:.3f}%")    
+    elif MODEL =="ourmodel":
+        print("***stay tuned***")

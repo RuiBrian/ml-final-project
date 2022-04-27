@@ -99,7 +99,6 @@ def merge_nn_output(files):
         writer.writerow(headers) 
         writer.writerows(data)    
     
-    
 if __name__ == "__main__":
     if len(sys.argv) < 2 :
         print("***Please specify baseline (nnsplice or spliceai)***")

@@ -5,6 +5,7 @@ import numpy as np
 import csv
 from bs4 import BeautifulSoup
 
+#TODO make output just predicted coumn
 def parse_nn_html(file):
     """
     0 = neither
@@ -78,6 +79,26 @@ def parse_nn_html(file):
         writer.writerows(data)
     os.chdir(oldpath)
     print(f'created {newfile} with {newfileidx2-newfileidx1} preds')
+    return newfile 
+
+def merge_nn_output(files):
+    headers = ['line num','true label','predicted label']
+    data=np.empty((0,3),int)
+    for f in files:
+        # print(f"{data} and {np.shape(data)}")
+        # print(np.loadtxt(f, dtype=int,delimiter = ",",skiprows=1))
+        data = np.append(data,np.loadtxt(f, dtype=int,delimiter = ",",skiprows=1),axis=0)
+    # print(np.shape(data))
+    suffix=0
+    newfile = f"output/merged_nn_preds{suffix}.csv"
+    while (os.path.exists(newfile)):
+        suffix+=1
+        newfile = f"output/merged_nn_preds{suffix}.csv"
+    with open(newfile, 'w') as f:
+        writer = csv.writer(f , lineterminator='\n')
+        writer.writerow(headers) 
+        writer.writerows(data)    
+    
     
 if __name__ == "__main__":
     if len(sys.argv) < 2 :
@@ -92,8 +113,14 @@ if __name__ == "__main__":
                 print("invalid raw output given (must be html)")
         else:
             hfiles = os.listdir("output")
+            parsed=[]
             for h in hfiles:
                 if "nnsplice_" in h and '.csv' not in h:
-                    parse_nn_html(h)
+                    parsed.append("output/"+parse_nn_html(h))
+            print(parsed)
+            #merge into one file
+            merge_nn_output(parsed)
+
+            
     elif BASELINE == "spliceai":
         print("this doesn't do anything")

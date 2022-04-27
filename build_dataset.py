@@ -24,10 +24,16 @@ def one_hot_encode(file):
         axis=1,
     )
 
-    # TODO: One-hot encoding
+    # Perform one-hot encoding with pd.get_dummies()
+    sequences_df = sequences_df.transpose()
+    sequences_df = pd.Series(sequences_df.values.ravel("F"))
+    sequences_df = pd.get_dummies(sequences_df)
 
     # Output labels and encoded sequences to separate CSV files
     labels_df.to_csv(f"datasets/processed/{file}_labels.csv", header=None, index=False)
+    sequences_df.to_csv(
+        f"datasets/processed/{file}_encoded.csv", header=None, index=False
+    )
 
 
 def build_dataset():
@@ -74,24 +80,30 @@ def build_dataset():
     dev.to_csv("datasets/processed/dev.csv", header=None, index=False)
     test.to_csv("datasets/processed/test.csv", header=None, index=False)
 
-def nnsplice_dataset(filename,inputdir="datasets/raw/",outputdir="datasets/nnsplice/"):
+
+def nnsplice_dataset(
+    filename, inputdir="datasets/raw/", outputdir="datasets/nnsplice/"
+):
     if not filename.endswith(".fa"):
         print("incorrect file")
         return -1
-    #add fasta title to separate each sequence
-    newfilename = outputdir+"nnsplice_"+filename
-    startChar ='>'
-    i=0
-    with open(inputdir+filename, 'r') as names:
-        with open(newfilename, 'w') as updateFile:
+    # add fasta title to separate each sequence
+    newfilename = outputdir + "nnsplice_" + filename
+    startChar = ">"
+    i = 0
+    with open(inputdir + filename, "r") as names:
+        with open(newfilename, "w") as updateFile:
             for name in names:
-                updateFile.write(startChar+f'line{i} len={len(name)-1}\n' + name.rstrip() + '\n')   
-                i+=1 
+                updateFile.write(
+                    startChar + f"line{i} len={len(name)-1}\n" + name.rstrip() + "\n"
+                )
+                i += 1
     print(newfilename)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print('***Please specify dataset mode (nnsplice or ourmodel)***')
+        print("***Please specify dataset mode (nnsplice or ourmodel)***")
         sys.exit()
 
     MODE = sys.argv[1]
@@ -100,7 +112,7 @@ if __name__ == "__main__":
         nnsplice_dataset("donors.fa")
         nnsplice_dataset("exons.fa")
         nnsplice_dataset("neither.fa")
-        
+
     elif MODE == "ourmodel":
         build_dataset()
 

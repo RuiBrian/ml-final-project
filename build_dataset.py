@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import sys
+import os
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
@@ -72,11 +74,37 @@ def build_dataset():
     dev.to_csv("datasets/processed/dev.csv", header=None, index=False)
     test.to_csv("datasets/processed/test.csv", header=None, index=False)
 
+def nnsplice_dataset(filename,inputdir="datasets/raw/",outputdir="datasets/nnsplice/"):
+    if not filename.endswith(".fa"):
+        print("incorrect file")
+        return -1
+    #add fasta title to separate each sequence
+    newfilename = outputdir+"nnsplice_"+filename
+    startChar ='>'
+    i=0
+    with open(inputdir+filename, 'r') as names:
+        with open(newfilename, 'w') as updateFile:
+            for name in names:
+                updateFile.write(startChar+f'line{i} len={len(name)-1}\n' + name.rstrip() + '\n')   
+                i+=1 
+    print(newfilename)
 
 if __name__ == "__main__":
-    build_dataset()
+    if len(sys.argv) < 2:
+        print('***Please specify dataset mode (nnsplice or ourmodel)***')
+        sys.exit()
 
-    # Perform one-hot encoding on each split
-    one_hot_encode("train")
-    one_hot_encode("dev")
-    one_hot_encode("test")
+    MODE = sys.argv[1]
+    if MODE == "nnsplice":
+        nnsplice_dataset("acceptors.fa")
+        nnsplice_dataset("donors.fa")
+        nnsplice_dataset("exons.fa")
+        nnsplice_dataset("neither.fa")
+        
+    elif MODE == "ourmodel":
+        build_dataset()
+
+        # Perform one-hot encoding on each split
+        one_hot_encode("train")
+        one_hot_encode("dev")
+        one_hot_encode("test")

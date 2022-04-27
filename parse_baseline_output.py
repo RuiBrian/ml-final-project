@@ -84,9 +84,16 @@ if __name__ == "__main__":
         print("***Please specify baseline (nnsplice or spliceai)***")
     BASELINE = sys.argv[1]
     if BASELINE == "nnsplice":
-        hfiles = os.listdir("output")
-        for h in hfiles:
-            if "nnsplice_" in h and '.csv' not in h:
-                parse_nn_html(h)
+        if sys.argv ==3:
+            hfile = sys.argv[3]
+            if '.csv' not in hfile:
+                parse_nn_html(hfile)
+            else:
+                print("invalid raw output given (must be html)")
+        else:
+            hfiles = os.listdir("output")
+            for h in hfiles:
+                if "nnsplice_" in h and '.csv' not in h:
+                    parse_nn_html(h)
     elif BASELINE == "spliceai":
         print("this doesn't do anything")

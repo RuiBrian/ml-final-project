@@ -3,3 +3,5 @@ ml-final-project
 
 # vscode settings
 .vscode
+
+__pycache__

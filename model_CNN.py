@@ -3,37 +3,37 @@ import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
 
+
 class CNN(torch.nn.Module):
-    def __init__(self):
-        super.__init__()
+    def __init__(self, input_height, input_width, n_classes):
+        super().__init__()
+        self.input_height = input_height
+        self.input_width = input_width
+        self.n_classes = n_classes
+
         # ConvNet architecture
-        # self.layers = torch.nn.Sequential(
-        #     # TODO: Add network layers
-        # )
+        self.conv_layers = nn.Sequential(
+            # TODO: Tweak model architecture
+            nn.Conv2d(1, 8, kernel_size=1, stride=1, padding=1),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(8, 8, kernel_size=1, stride=1, padding=1),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=4, stride=2),
+        )
 
-        self.input_height = 82 #input_height
-        self.input_width = 4 #input_width
-        self.n_classes = 3 #0 (neither), 1(donor), 2 (acceptor) n_classes
-        self.conv1 = nn.Conv2d(1,8,3,1) #(1, 32, 3, 1)   #(1,8,3,1)     
-        self.conv2 = nn.Conv2d(8,16,3,2)#(32, 64, 3, 2)   #(8,16,3,2)
-        self.pool1 = nn.AvgPool2d(kernel_size=12)    #()
-        self.conv3 = nn.Conv2d(16,6,1,1)#(64, 6, 1, 1) #(16,6,1,1)
-        # raise NotImplementedError()
-   
-    def forward(self,x):
+        self.linear_layers = nn.Sequential(
+            nn.Linear(168, self.n_classes)
+        )
 
-        #reshape vectors to images
-        elems = torch.numel(x)
-        batch = int(elems/ (self.input_height*self.input_width))
-        x = np.reshape(x, (batch, self.input_height,self.input_width))
-        x = torch.unsqueeze(x,1)
-        x = self.conv1(x)
-        x = F.relu(x)
-        x = self.conv2(x)
-        x = F.relu(x)
-        x = self.pool1(x)
-        x = self.conv3(x)
-        x = torch.reshape(x,(batch,self.n_classes))
+    def forward(self, x):
+        # Add channel and batch dimension
+        x = x.unsqueeze(0)  # One channel
+        x = x.unsqueeze(0)  # Batch size of 1
+
+        # Pass through network layers
+        x = self.conv_layers(x)
+        x = x.view(x.size(0), -1)
+        x = self.linear_layers(x)
 
         return x
-    

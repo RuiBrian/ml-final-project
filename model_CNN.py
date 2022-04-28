@@ -14,16 +14,25 @@ class CNN(torch.nn.Module):
         # ConvNet architecture
         self.conv_layers = nn.Sequential(
             # TODO: Tweak model architecture
-            nn.Conv2d(1, 8, kernel_size=1, stride=1, padding=1),
+            nn.Conv2d(1, 128, kernel_size=1, stride=1),
             nn.ReLU(),
-            nn.AvgPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(8, 8, kernel_size=1, stride=1, padding=1),
+            nn.AvgPool2d(kernel_size=1, stride=1),
+            nn.Conv2d(128, 128, kernel_size=2, stride=2),
             nn.ReLU(),
-            nn.AvgPool2d(kernel_size=4, stride=2),
+            nn.AvgPool2d(kernel_size=1, stride=1),
+            nn.Conv2d(128, 64, kernel_size=1, stride=2),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=1, stride=1),
+            nn.Conv2d(64, 64, kernel_size=1, stride=2),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=1, stride=1),
+            nn.Conv2d(64, 8, kernel_size=1, stride=2),
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=1, stride=1),
         )
 
         self.linear_layers = nn.Sequential(
-            nn.Linear(168, self.n_classes)
+            nn.Linear(40, self.n_classes)
         )
 
     def forward(self, x):

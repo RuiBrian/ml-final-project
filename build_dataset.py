@@ -29,11 +29,9 @@ def one_hot_encode(file):
     sequences_df = pd.Series(sequences_df.values.ravel("F"))
     sequences_df = pd.get_dummies(sequences_df)
 
-    # Output labels and encoded sequences to separate CSV files
-    labels_df.to_csv(f"datasets/processed/{file}_labels.csv", header=None, index=False)
-    sequences_df.to_csv(
-        f"datasets/processed/{file}_encoded.csv", header=None, index=False
-    )
+    # Convert to numpy arrays and save as .npy
+    np.save(f"datasets/processed/{file}_labels.npy", labels_df.to_numpy())
+    np.save(f"datasets/processed/{file}_encoded.npy", sequences_df.to_numpy())
 
 
 def build_dataset():
@@ -44,6 +42,12 @@ def build_dataset():
     acceptors_df = pd.read_csv(
         "datasets/raw/acceptors.fa", header=None, index_col=False
     )
+
+    # Sample smaller portions of dataframe
+    neither_df = neither_df.sample(frac=0.05, replace=False, random_state=0)
+    exons_df = exons_df.sample(frac=0.05, replace=False, random_state=0)
+    donors_df = donors_df.sample(frac=0.1, replace=False, random_state=0)
+    acceptors_df = acceptors_df.sample(frac=0.1, replace=False, random_state=0)
 
     # Convert to all uppercase
     neither_df = neither_df.applymap(lambda s: s.upper())

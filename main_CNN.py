@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import sys
+from torchsummary import summary
 
 
 def train():
@@ -12,7 +13,7 @@ def train():
     # )
     TRAIN_LABELS = np.load("datasets/processed/train_labels.npy")
 
-    # Number of images in the training corpus
+    # Number of gene sequences in the training corpus
     N_SEQUENCES = TRAIN_LABELS.shape[0]
 
     # Dimensions of a one-hot encoded sequence
@@ -29,21 +30,25 @@ def train():
     # Initialize model and optimizer
     model = CNN(input_height=HEIGHT, input_width=WIDTH, n_classes=N_CLASSES)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer.zero_grad()
     
-    
+    s = 0
     for step in range(0, EPOCHS, HEIGHT):
         x = torch.from_numpy(TRAIN_SEQUENCES[step : step + HEIGHT].astype(np.float32))
-        y = torch.from_numpy(TRAIN_LABELS[step].astype(int))
+        y = torch.from_numpy(TRAIN_LABELS[s].astype(int))
+        s += 1
             
-
         # Forward pass: get logits for x
         logits = model(x)
 
         # Compute loss
         loss = F.cross_entropy(logits, y)
+        
+        if step < 100*82:
+            print(logits)
+            # print(torch.max(logits, 1)[1].item())
 
         # Zero gradients, perform a backward pass, and update the weights.
-        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
@@ -59,11 +64,14 @@ def predict():
     model = torch.load("models/CNN.pt")
     predictions = []
 
-    for i in range(0, TEST_SEQUENCES.shape[0], 82):
+    for i in range(0, TEST_SEQUENCES.shape[0], HEIGHT):
         x = torch.from_numpy(TEST_SEQUENCES[i : i + HEIGHT].astype(np.float32))
         logits = model(x)
         pred = torch.max(logits, 1)[1]
         predictions.append(pred.item())
+        
+        # if i < 100*82:
+        #     print(logits)
 
     predictions = np.array(predictions)
     np.savetxt("predictions/CNN_predictions.csv", predictions, fmt="%d")

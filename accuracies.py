@@ -24,9 +24,9 @@ def simple_accuracy(truefile,predfile):
     labels = np.load(truefile,allow_pickle=True)
     preds = np.loadtxt(predfile)
     if len(labels) > len(preds):
-        print("labels len and pred len doesn't match")
-        return -1
-        # labels = labels[:len(preds)]
+        # print("labels len and pred len doesn't match")
+        # return -1
+        labels = labels[:len(preds)]
     # print(f"{len(labels)} and t{len(preds)}")
     comparison = (labels==preds)
     # incorrect = np.where(comparison=False)
@@ -66,8 +66,8 @@ def pr_auc(truefile,predfile):
     labels = np.load(truefile,allow_pickle=True)
     preds = np.loadtxt(predfile)
     if len(labels) > len(preds):
-        print("labels len and pred len doesn't match")
-        # labels = labels[:len(preds)]
+        # print("labels len and pred len doesn't match")
+        labels = labels[:len(preds)]
     # print(f"{len(labels)} and t{len(preds)}")
     labels = label_binarize(labels,classes=classes)
     preds = label_binarize(preds,classes = classes)
@@ -174,12 +174,13 @@ if __name__ == "__main__":
         print(f"{outputfile} Accuracy is {simple_nn_accuracy(outputfile)*100:.3f}% and PR-AUC = {nn_pr_auc(outputfile)*100:.3f}%")    
     elif MODEL =="ourmodel":
         # print("***stay tuned***")
+        truef = "datasets/processed/dev_labels.npy"
         predf = "predictions/CNN_predictions.csv"
-        truef = "datasets/processed/test_labels.npy"
         if len(sys.argv) > 2:
             truef = sys.argv[2]
             if len(sys.argv) > 3:
                 predf = sys.argv[3]
         print(f"simple accuracy={simple_accuracy(truef,predf)} and pr-auc={pr_auc(truef,predf)}")
 
-        
+    else:
+        print("*** no valid model given ***")

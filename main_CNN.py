@@ -25,12 +25,11 @@ def train():
 
     # Parameters
     LEARNING_RATE = 0.0001
-    EPOCHS = 10000
+    EPOCHS = 28000
 
     # Initialize model and optimizer
     model = CNN(input_height=HEIGHT, input_width=WIDTH, n_classes=N_CLASSES)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    optimizer.zero_grad()
     
     s = 0
     for step in range(0, EPOCHS, HEIGHT):
@@ -45,11 +44,12 @@ def train():
         # Compute loss
         loss = F.cross_entropy(logits, y)
         
-        if step < 100*82:
+        # if step > 100*82:
             # print(torch.softmax(logits, 1))
-            print(torch.max(logits_label, 1)[1])
+            # print(torch.max(logits_label, 1)[1].item())
 
         # Zero gradients, perform a backward pass, and update the weights.
+        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 

@@ -7,9 +7,9 @@ import sys
 
 def train():
     TRAIN_SEQUENCES = np.load("datasets/processed/train_encoded.npy")
-    TRAIN_SEQUENCES = (TRAIN_SEQUENCES - TRAIN_SEQUENCES.mean()) / (
-        TRAIN_SEQUENCES.std()
-    )
+    # TRAIN_SEQUENCES = (TRAIN_SEQUENCES - TRAIN_SEQUENCES.mean()) / (
+    #     TRAIN_SEQUENCES.std()
+    # )
     TRAIN_LABELS = np.load("datasets/processed/train_labels.npy")
 
     # Number of images in the training corpus
@@ -23,16 +23,18 @@ def train():
     N_CLASSES = 3
 
     # Parameters
-    LEARNING_RATE = 0.0005
+    LEARNING_RATE = 0.0001
     EPOCHS = 10000
 
     # Initialize model and optimizer
     model = CNN(input_height=HEIGHT, input_width=WIDTH, n_classes=N_CLASSES)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-
-    for step in range(EPOCHS):
+    
+    
+    for step in range(0, EPOCHS, HEIGHT):
         x = torch.from_numpy(TRAIN_SEQUENCES[step : step + HEIGHT].astype(np.float32))
         y = torch.from_numpy(TRAIN_LABELS[step].astype(int))
+            
 
         # Forward pass: get logits for x
         logits = model(x)
@@ -50,7 +52,7 @@ def train():
 
 def predict():
     TEST_SEQUENCES = np.load("datasets/processed/test_encoded.npy")
-    TEST_SEQUENCES = (TEST_SEQUENCES - TEST_SEQUENCES.mean()) / (TEST_SEQUENCES.std())
+    # TEST_SEQUENCES = (TEST_SEQUENCES - TEST_SEQUENCES.mean()) / (TEST_SEQUENCES.std())
     HEIGHT = 82
     NUM_SEQUENCES = int(TEST_SEQUENCES.shape[0] / HEIGHT)
 

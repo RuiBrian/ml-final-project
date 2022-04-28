@@ -40,13 +40,14 @@ def train():
             
         # Forward pass: get logits for x
         logits = model(x)
+        logits_label = torch.softmax(logits, 1)
 
         # Compute loss
         loss = F.cross_entropy(logits, y)
         
         if step < 100*82:
-            print(logits)
-            # print(torch.max(logits, 1)[1].item())
+            # print(torch.softmax(logits, 1))
+            print(torch.max(logits_label, 1)[1])
 
         # Zero gradients, perform a backward pass, and update the weights.
         loss.backward()
@@ -67,11 +68,13 @@ def predict():
     for i in range(0, TEST_SEQUENCES.shape[0], HEIGHT):
         x = torch.from_numpy(TEST_SEQUENCES[i : i + HEIGHT].astype(np.float32))
         logits = model(x)
-        pred = torch.max(logits, 1)[1]
+        
+        pred_normalized = torch.softmax(logits, 1)
+        pred = torch.max(pred_normalized, 1)[1]
         predictions.append(pred.item())
         
         # if i < 100*82:
-        #     print(logits)
+        #     print(pred_normalized)
 
     predictions = np.array(predictions)
     np.savetxt("predictions/CNN_predictions.csv", predictions, fmt="%d")

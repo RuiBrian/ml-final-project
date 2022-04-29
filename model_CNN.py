@@ -36,7 +36,9 @@ class CNN(torch.nn.Module):
             nn.AvgPool2d(kernel_size=1, stride=1),
         )
 
-        self.linear_layers = nn.Sequential(nn.Linear(48, self.n_classes))
+        self.linear_layers = nn.Sequential(
+            nn.Linear(48, 24), nn.ReLU(), nn.Linear(24, n_classes)
+        )
 
     def forward(self, x):
         # Add channel and batch dimension

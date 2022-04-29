@@ -21,7 +21,7 @@ def train(device):
     N_CLASSES = 3
 
     # Parameters
-    LEARNING_RATE = 0.0001
+    LEARNING_RATE = 0.001
     EPOCHS = 28000
 
     # Initialize model and optimizer

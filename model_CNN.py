@@ -29,12 +29,12 @@ class CNN(torch.nn.Module):
             # nn.ReLU(),
             # nn.AvgPool2d(kernel_size=1, stride=1),
            
-            # nn.Conv2d(64, 64, kernel_size=1, stride=2),
-            # nn.BatchNorm2d(64),
+            # nn.Conv2d(64, 32, kernel_size=1, stride=2),
+            # nn.BatchNorm2d(32),
             # nn.ReLU(),
             # nn.AvgPool2d(kernel_size=1, stride=1),
            
-            # nn.Conv2d(64, 8, kernel_size=1, stride=2),
+            # nn.Conv2d(32, 8, kernel_size=1, stride=2),
             # nn.BatchNorm2d(8),
             # nn.ReLU(),
             # nn.AvgPool2d(kernel_size=1, stride=1),

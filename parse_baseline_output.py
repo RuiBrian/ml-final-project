@@ -116,7 +116,7 @@ if __name__ == "__main__":
             for h in hfiles:
                 if "nnsplice_" in h and '.csv' not in h:
                     parsed.append("output/"+parse_nn_html(h))
-            print(parsed)
+            # print(parsed)
             #merge into one file
             merge_nn_output(parsed)
 

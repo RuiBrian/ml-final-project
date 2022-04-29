@@ -1,12 +1,17 @@
 from distutils.log import ERROR
+from typing import Dict
 from xml.etree.ElementPath import prepare_descendant
 import numpy as np
 import sys
-from sklearn.metrics import precision_recall_curve, auc
+from sklearn.metrics import precision_recall_curve, auc, average_precision_score
+from torchmetrics import PrecisionRecallCurve, AveragePrecision
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
+# from torchmetrics.functional import auc
 from sklearn.preprocessing import label_binarize
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
+from sklearn.preprocessing import OneHotEncoder
 
 
 def simple_nn_accuracy(file):
@@ -23,12 +28,12 @@ def simple_nn_accuracy(file):
 
 
 def simple_accuracy(truefile, predfile):
-    labels = np.load(truefile, allow_pickle=True).squeeze()
+    labels = np.load(truefile).squeeze()
     preds = np.loadtxt(predfile)
     if labels.shape != preds.shape:
         print("labels len and pred len doesn't match")
         return
-    comparison = labels == preds
+    comparison = (labels == preds)
     # incorrect = np.where(comparison=False)
     # print(incorrect)
     # accuracy = len(incorrect[0])/len(labels)
@@ -44,6 +49,28 @@ def nn_pr_auc(file):
     """
     data = np.loadtxt(file, dtype=int, delimiter=",", skiprows=1)
     classes = [0, 1, 2, 3]
+    # true = torch.t(torch.from_numpy(data[:,1]))
+    # pred = F.one_hot(torch.from_numpy(data[:, 2]),num_classes = len(classes))
+    # print(pred)
+    # print("********")
+    # average_precision = AveragePrecision(num_classes=len(classes))
+    # accuracy = average_precision(pred, true)
+    # preds=[]
+    # target=[]
+    # for i in range(len(true)):
+    #     preds.append(dict())
+
+    # metric = MeanAveragePrecision()
+    # metric.update(pred,true)
+    # m = metric.compute()
+    # accuracy = m[0]
+    # true = torch.from_numpy(data[:, 1])
+    # pred = F.one_hot(torch.from_numpy(data[:, 2]),num_classes = len(classes))
+    # pr_curve = PrecisionRecallCurve(num_classes= len(classes),pos_label=1)
+    # precision, recall, thresholds = pr_curve(pred, true)
+    # print(precision)
+    # print(recall)
+    # accuracy = auc(torch.tensor(precision),torch.tensor(recall))
     true = label_binarize(data[:, 1], classes=classes)
     pred = label_binarize(data[:, 2], classes=classes)
     precision = dict()
@@ -52,7 +79,9 @@ def nn_pr_auc(file):
     for i in range(len(classes)):
         precision[i], recall[i], _ = precision_recall_curve(true[:, i], pred[:, i])
         accuracies.append(auc(precision[i], recall[i]))
-    # print(accuracies)
+        # accuracies.append(average_precision_score(true, pred))
+
+    # # print(accuracies)
     accuracy = np.nanmean(accuracies)
     # precision, recall, thresholds = precision_recall_curve(true, pred)
     # accuracy = auc(precision, recall)
@@ -65,14 +94,24 @@ def pr_auc(truefile, predfile):
     """
     classes = [0, 1, 2]
     labels = np.load(truefile, allow_pickle=True)
-    preds = np.loadtxt(predfile)
-    if len(labels) > len(preds):
-        # print("labels len and pred len doesn't match")
-        labels = labels[: len(preds)]
-    # print(f"{len(labels)} and t{len(preds)}")
+    preds = np.loadtxt(predfile,dtype=int)
+
+    # labels = torch.t(torch.from_numpy(labels))
+    # preds = F.one_hot(torch.from_numpy(preds),num_classes = len(classes))
+    # print(labels.size())
+    # print(labels)
+    # print(preds.size())   
+    # average_precision = AveragePrecision(num_classes=len(classes))
+    # print( average_precision(preds, labels))
+    # labels = np.load(truefile, allow_pickle=True)
+    # preds = np.loadtxt(predfile)
+    # if len(labels) > len(preds):
+    #     # print("labels len and pred len doesn't match")
+    #     labels = labels[: len(preds)]
+    # # print(f"{len(labels)} and t{len(preds)}")
     labels = label_binarize(labels, classes=classes)
     preds = label_binarize(preds, classes=classes)
-
+#
     precision = dict()
     recall = dict()
     accuracies = []
@@ -186,7 +225,7 @@ if __name__ == "__main__":
         if len(sys.argv) > 2:
             outputfile = sys.argv[2]
         print(
-            f"{outputfile} Accuracy is {simple_nn_accuracy(outputfile)*100:.3f}% and PR-AUC = {nn_pr_auc(outputfile)*100:.3f}%"
+            f"{outputfile} Accuracy is {simple_nn_accuracy(outputfile)*100}% and PR-AUC = {nn_pr_auc(outputfile)*100}%"
         )
     elif MODEL == "ourmodel":
         # print("***stay tuned***")

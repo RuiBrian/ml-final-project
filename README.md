@@ -44,7 +44,7 @@ $ python parse_baseline_output.py nnsplice
 ```
 Compute accuracy:
 ```shell
-$ python accuracies.py nnsplice
+$ python accuracies.py nnsplice path_to_output.csv[default=output/merged_nn_preds0.csv]
 ```
 
 ## Running the model

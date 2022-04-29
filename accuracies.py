@@ -191,7 +191,7 @@ if __name__ == "__main__":
     elif MODEL == "ourmodel":
         # print("***stay tuned***")
         truef = "datasets/processed/dev_labels.npy"
-        predf = "predictions/CNN_predictions.csv"
+        predf = "predictions/CNN_dev_predictions.csv"
         if len(sys.argv) > 2:
             truef = sys.argv[2]
             if len(sys.argv) > 3:

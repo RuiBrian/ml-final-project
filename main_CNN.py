@@ -72,7 +72,7 @@ def predict(device):
         predictions.append(pred.item())
 
     predictions = np.array(predictions)
-    np.savetxt("predictions/CNN_predictions.csv", predictions, fmt="%d")
+    np.savetxt("predictions/CNN_dev_predictions.csv", predictions, fmt="%d")
 
 
 if __name__ == "__main__":

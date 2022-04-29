@@ -15,25 +15,28 @@ class CNN(torch.nn.Module):
         self.conv_layers = nn.Sequential(
             # TODO: Tweak model architecture
             nn.Conv2d(1, 128, kernel_size=1, stride=1),
+            nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.AvgPool2d(kernel_size=1, stride=1),
             nn.Conv2d(128, 128, kernel_size=2, stride=2),
+            nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.AvgPool2d(kernel_size=1, stride=1),
             nn.Conv2d(128, 64, kernel_size=1, stride=2),
+            nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.AvgPool2d(kernel_size=1, stride=1),
             nn.Conv2d(64, 64, kernel_size=1, stride=2),
+            nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.AvgPool2d(kernel_size=1, stride=1),
             nn.Conv2d(64, 8, kernel_size=1, stride=2),
+            nn.BatchNorm2d(8),
             nn.ReLU(),
             nn.AvgPool2d(kernel_size=1, stride=1),
         )
 
-        self.linear_layers = nn.Sequential(
-            nn.Linear(40, self.n_classes)
-        )
+        self.linear_layers = nn.Sequential(nn.Linear(48, self.n_classes))
 
     def forward(self, x):
         # Add channel and batch dimension

@@ -39,7 +39,6 @@ def train(device):
 
         # Forward pass: get logits for x
         logits = model(x)
-        logits_label = torch.softmax(logits, 1)
 
         # Compute loss
         loss = F.cross_entropy(logits, y)
@@ -67,8 +66,7 @@ def predict(device):
         )
         logits = model(x)
 
-        pred_normalized = torch.softmax(logits, 1)
-        pred = torch.max(pred_normalized, 1)[1]
+        pred = torch.max(logits, 1)[1]
         predictions.append(pred.item())
 
     predictions = np.array(predictions)

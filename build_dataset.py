@@ -24,6 +24,10 @@ def one_hot_encode(file):
         axis=1,
     )
 
+    sequences_df.to_csv(
+        f"datasets/processed/{file}_separated.csv", header=None, index=False
+    )
+
     # Perform one-hot encoding with pd.get_dummies()
     sequences_df = sequences_df.transpose()
     sequences_df = pd.Series(sequences_df.values.ravel("F"))

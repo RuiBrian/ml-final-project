@@ -27,27 +27,30 @@ $ pip install -r requirements.txt
 Build dataset:
 
 ```shell
-$ python build_dataset.py
+$ python build_dataset.py ourmodel
 ```
+
 ## NNSplice Baseline
+
 Prepare dataset for NNsplice:
+
 ```shell
 $ python python build_dataset.py nnsplice
 ```
-Run model:
-Copy paste 1000 sequences to the website and submit
-save html file 
+
+Run model: Copy and paste 1000 sequences to the website and submit. Save the HTML file.
 
 Scrape NNSplice output:
 ```shell
 $ python parse_baseline_output.py nnsplice
 ```
+
 Compute accuracy:
 ```shell
 $ python accuracies.py nnsplice path_to_output.csv[default=output/merged_nn_preds0.csv]
 ```
 
-## Running the model
+## CNN model
 
 Train the model:
 
@@ -66,11 +69,31 @@ Compute accuracy:
 ```shell
 $ 
 ```
+
 Build dataset:
+```shell
 $ python build_dataset.py
 ```
 
 Compute accuracy:
+
 ```shell
 $ python accuracies.py ourmodel path_to_predictions.csv[default=predictions/CNN_dev_predictions.csv] path_to_labels.npy[default=datasets/processed/dev_labels.npy]
+```
+
+## SVM
+
+Fit and predict:
+
+```shell
+$ python main_SVM.py
+```
+
+## AdaBoost
+
+
+Fit and predict:
+
+```shell
+$ python main_AdaBoost.py
 ```

@@ -14,13 +14,13 @@ def fit_predict():
     X_train = OneHotEncoder().fit_transform(X_train).astype(int).toarray()
     y_train = np.load("datasets/processed/train_labels.npy").ravel()
 
-    # Load test data and labels
+    # Load dev data and labels
     X_dev = pd.read_csv(
-        "datasets/processed/test_separated.csv", header=None, index_col=False
+        "datasets/processed/dev_separated.csv", header=None, index_col=False
     )
     X_dev = X_dev.to_numpy()
     X_dev = OneHotEncoder().fit_transform(X_dev).astype(int).toarray()
-    y_test = np.load("datasets/processed/test_labels.npy").ravel()
+    y_dev = np.load("datasets/processed/dev_labels.npy").ravel()
 
     # Fit AdaBoost classifier
     clf = AdaBoostClassifier(n_estimators=100, random_state=0)
@@ -32,7 +32,7 @@ def fit_predict():
         clf.predict(X_dev).astype(int),
         fmt="%i",
     )
-    print(f"Accuracy: {clf.score(X_dev, y_test)}")
+    print(f"Accuracy: {clf.score(X_dev, y_dev)}")
 
 
 if __name__ == "__main__":

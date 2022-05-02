@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn import metrics
@@ -16,19 +16,26 @@ def fit_predict():
     X_train = OneHotEncoder().fit_transform(X_train).astype(int).toarray()
     y_train = np.load("datasets/processed/train_labels.npy").ravel()
 
-    # Load test data and labels
-    X_test = pd.read_csv(
-        "datasets/processed/test_separated.csv", header=None, index_col=False
+    # Load dev data and labels
+    X_dev = pd.read_csv(
+        "datasets/processed/dev_separated.csv", header=None, index_col=False
     )
-    X_test = X_test.to_numpy()
-    X_test = OneHotEncoder().fit_transform(X_test).astype(int).toarray()
-    y_test = np.load("datasets/processed/test_labels.npy").ravel()
+    X_dev = X_dev.to_numpy()
+    X_dev = OneHotEncoder().fit_transform(X_dev).astype(int).toarray()
+    y_dev = np.load("datasets/processed/dev_labels.npy").ravel()
 
-    classifier = SVC(kernel="linear", C=1, decision_function_shape="ovo")
+    # Fit SVM
+    classifier = LinearSVC(C=1, random_state=0, dual=False)
     classifier.fit(X_train, y_train)
-    y_pred = classifier.predict(X_test)
+    y_pred = classifier.predict(X_dev)
 
-    print(f"Accuracy: {metrics.accuracy_score(y_test, y_pred)}")
+    # Save predictions and print accuracy
+    np.savetxt(
+        "predictions/SVM_dev_predictions.csv",
+        y_pred,
+        fmt="%i",
+    )
+    print(f"Accuracy: {metrics.accuracy_score(y_dev, y_pred)}")
 
 
 if __name__ == "__main__":

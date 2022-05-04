@@ -12,19 +12,21 @@ from sklearn.calibration import CalibratedClassifierCV
 def fit_predict(num_NT):
     # Load training data and labels
     X_train = pd.read_csv(
-        "datasets/processed/{}nt_train_separated.csv".format(num_NT), header=None, index_col=False
-    )
+        "datasets/processed/{}nt_train_separated.csv".format(num_NT), 
+        header=None, index_col=False)
     X_train = X_train.to_numpy()
     X_train = OneHotEncoder().fit_transform(X_train).astype(int).toarray()
-    y_train = np.load("datasets/processed/{}nt_train_labels.npy".format(num_NT)).ravel()
+    y_train = np.load(
+        "datasets/processed/{}nt_train_labels.npy".format(num_NT)).ravel()
 
     # Load dev data and labels
     X_dev = pd.read_csv(
-        "datasets/processed/{}nt_dev_separated.csv".format(num_NT), header=None, index_col=False
-    )
+        "datasets/processed/{}nt_dev_separated.csv".format(num_NT), 
+        header=None, index_col=False)
     X_dev = X_dev.to_numpy()
     X_dev = OneHotEncoder().fit_transform(X_dev).astype(int).toarray()
-    y_dev = np.load("datasets/processed/{}nt_dev_labels.npy".format(num_NT)).ravel()
+    y_dev = np.load(
+        "datasets/processed/{}nt_dev_labels.npy".format(num_NT)).ravel()
 
     # Fit SVM
     classifier = LinearSVC(C=1, random_state=0, dual=False)
@@ -39,12 +41,12 @@ def fit_predict(num_NT):
         "predictions/{}nt_SVM_dev_predictions.csv".format(num_NT),
         y_pred,
         fmt="%i",
-    )
+        )
     np.savetxt(
         "predictions/{}nt_SVM_dev_softpredictions.csv".format(num_NT),
         y_softpred,
         fmt="%f",
-    )
+        )
     print(f"Accuracy: {metrics.accuracy_score(y_dev, y_pred)}")
 
 

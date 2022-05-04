@@ -44,46 +44,37 @@ def simple_accuracy(truefile, predfile):
 
 def nn_pr_auc(file):
     """
-    PR-AUC is the area under the precision-recall curve.
+    PR-AUC is the average area under the precision-recall curve of each class.
     Binarize predictions and labels then calculate precision-recall
-    curve for each pair and calculate the average area under the curve
+    curve for each class
     """
     data = np.loadtxt(file, dtype=int, delimiter=",", skiprows=1)
-    classes = [0, 1, 2, 3]
-    # true = torch.t(torch.from_numpy(data[:,1]))
-    # pred = F.one_hot(torch.from_numpy(data[:, 2]),num_classes = len(classes))
-    # print(pred)
-    # print("********")
-    # average_precision = AveragePrecision(num_classes=len(classes))
-    # accuracy = average_precision(pred, true)
-    # preds=[]
-    # target=[]
-    # for i in range(len(true)):
-    #     preds.append(dict())
-
-    # metric = MeanAveragePrecision()
-    # metric.update(pred,true)
-    # m = metric.compute()
-    # accuracy = m[0]
-    # true = torch.from_numpy(data[:, 1])
-    # pred = F.one_hot(torch.from_numpy(data[:, 2]),num_classes = len(classes))
-    # pr_curve = PrecisionRecallCurve(num_classes= len(classes),pos_label=1)
-    # precision, recall, thresholds = pr_curve(pred, true)
-    # print(precision)
-    # print(recall)
-    # accuracy = auc(torch.tensor(precision),torch.tensor(recall))
+    classes = [0, 1, 2]
     true = label_binarize(data[:, 1], classes=classes)
     pred = label_binarize(data[:, 2], classes=classes)
     precision = dict()
     recall = dict()
+    threshold =dict()
+    accuracies=dict()
     accuracies = []
+    plt.axis()
     for i in range(len(classes)):
-        precision[i], recall[i], _ = precision_recall_curve(true[:, i], pred[:, i])
+        precision[i], recall[i], threshold[i] = precision_recall_curve(true[:, i], pred[:, i])
+        plt.plot(recall[i],precision[i],label=f"class {i}")
         accuracies.append(auc(recall[i],precision[i]))
         # accuracies.append(average_precision_score(true, pred))
-
+    plt.legend()
+    accuracy = np.mean(accuracies)*100
+    figname = os.path.splitext(file)[0][:-2]
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
+    plt.title(figname+'_'+str(accuracy))
+    plt.savefig(figname+'_'+str(accuracy)+'.png')
+    plt.show()    
     # # print(accuracies)
-    accuracy = np.mean(accuracies)
+    print(threshold)
+    print(recall)
+    print(precision)
     # precision, recall, thresholds = precision_recall_curve(true, pred)
     # accuracy = auc(precision, recall)
     return accuracy
@@ -110,6 +101,8 @@ def pr_auc(truefile, probfile):
         accuracies.append(auc(recall[i],precision[i]))
         plt.plot(recall[i],precision[i],label=f"class {i}")
     plt.legend()
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
     figname = os.path.splitext(probfile)[0]
     plt.title(figname)
     plt.savefig(figname+'.png')

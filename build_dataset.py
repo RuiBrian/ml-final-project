@@ -7,12 +7,12 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
 
-def one_hot_encode(file):
+def one_hot_encode(file, num_NT):
     # Prevent truncation of long strings
     pd.set_option("display.max_colwidth", None)
 
     # Load file into dataframe
-    df = pd.read_csv(f"datasets/processed/{file}.csv", header=None, index_col=False)
+    df = pd.read_csv(f"datasets/processed/{num_NT}nt_{file}.csv", header=None, index_col=False)
 
     # Split labels and sequences
     labels_df = df.iloc[:, [0]]
@@ -25,7 +25,7 @@ def one_hot_encode(file):
     )
 
     sequences_df.to_csv(
-        f"datasets/processed/{file}_separated.csv", header=None, index=False
+        f"datasets/processed/{num_NT}nt_{file}_separated.csv", header=None, index=False
     )
 
     # Perform one-hot encoding with pd.get_dummies()
@@ -34,24 +34,25 @@ def one_hot_encode(file):
     sequences_df = pd.get_dummies(sequences_df)
 
     # Convert to numpy arrays and save as .npy
-    np.save(f"datasets/processed/{file}_labels.npy", labels_df.to_numpy())
-    np.save(f"datasets/processed/{file}_encoded.npy", sequences_df.to_numpy())
+    np.save(f"datasets/processed/{num_NT}nt_{file}_labels.npy", labels_df.to_numpy())
+    np.save(f"datasets/processed/{num_NT}nt_{file}_encoded.npy", sequences_df.to_numpy())
 
 
-def build_dataset():
+def build_dataset(num_NT):
     # Load into dataframes
-    neither_df = pd.read_csv("datasets/raw/neither.fa", header=None, index_col=False)
-    exons_df = pd.read_csv("datasets/raw/exons.fa", header=None, index_col=False)
-    donors_df = pd.read_csv("datasets/raw/donors.fa", header=None, index_col=False)
+    neither_df = pd.read_csv("datasets/raw/{}nt_neither.fa".format(num_NT), header=None, index_col=False)
+    exons_df = pd.read_csv("datasets/raw/{}nt_exons.fa".format(num_NT), header=None, index_col=False)
+    donors_df = pd.read_csv("datasets/raw/{}nt_donors.fa".format(num_NT), header=None, index_col=False)
     acceptors_df = pd.read_csv(
-        "datasets/raw/acceptors.fa", header=None, index_col=False
+        "datasets/raw/{}nt_acceptors.fa".format(num_NT), header=None, index_col=False
     )
 
     # Sample smaller portions of dataframe
-    neither_df = neither_df.sample(frac=0.05, replace=False, random_state=0)
-    exons_df = exons_df.sample(frac=0.05, replace=False, random_state=0)
-    donors_df = donors_df.sample(frac=0.1, replace=False, random_state=0)
-    acceptors_df = acceptors_df.sample(frac=0.1, replace=False, random_state=0)
+    frac_totaldata = 0.5
+    neither_df = neither_df.sample(frac=frac_totaldata/2, replace=False, random_state=0)
+    exons_df = exons_df.sample(frac=frac_totaldata/2, replace=False, random_state=0)
+    donors_df = donors_df.sample(frac=frac_totaldata, replace=False, random_state=0)
+    acceptors_df = acceptors_df.sample(frac=frac_totaldata, replace=False, random_state=0)
 
     # Convert to all uppercase
     neither_df = neither_df.applymap(lambda s: s.upper())
@@ -84,9 +85,9 @@ def build_dataset():
     print(f"Number of test examples: {test.shape[0]}")
 
     # Write to CSV files
-    train.to_csv("datasets/processed/train.csv", header=None, index=False)
-    dev.to_csv("datasets/processed/dev.csv", header=None, index=False)
-    test.to_csv("datasets/processed/test.csv", header=None, index=False)
+    train.to_csv("datasets/processed/{}nt_train.csv".format(num_NT), header=None, index=False)
+    dev.to_csv("datasets/processed/{}nt_dev.csv".format(num_NT), header=None, index=False)
+    test.to_csv("datasets/processed/{}nt_test.csv".format(num_NT), header=None, index=False)
 
 
 def nnsplice_dataset(
@@ -114,8 +115,10 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("***Please specify dataset mode (nnsplice or ourmodel)***")
         sys.exit()
-
+        
+    
     MODE = sys.argv[1]
+    
     if MODE == "nnsplice":
         hfiles = os.listdir("datasets/raw")
         for h in hfiles:        
@@ -127,9 +130,15 @@ if __name__ == "__main__":
         # nnsplice_dataset("neither.fa")
 
     elif MODE == "ourmodel":
-        build_dataset()
+        if len(sys.argv) < 3:
+            print("***Please specify number of nucleotides (80 or 400)***")
+            sys.exit()
+            
+        num_NT = sys.argv[2]
+        
+        build_dataset(num_NT)
 
         # Perform one-hot encoding on each split
-        one_hot_encode("train")
-        one_hot_encode("dev")
-        one_hot_encode("test")
+        one_hot_encode("train", num_NT)
+        one_hot_encode("dev", num_NT)
+        one_hot_encode("test", num_NT)

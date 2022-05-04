@@ -20,7 +20,7 @@ print("Total predict label=0: ", np.sum(dev_predict==0))
 print("Total predict label=1: ", np.sum(dev_predict==1))
 print("Total predict label=2: ", np.sum(dev_predict==2))
 print("Accuracy: ", np.sum(np.transpose(dev_labels)[0]==dev_predict)/int(dev_encoded.shape[0]/82))
-print(f"Accuracy: {accuracy_score(dev_labels, dev_predict)}")
+# print(f"Accuracy: {accuracy_score(dev_labels, dev_predict)}")
 
 # dev_softpredict = np.loadtxt("predictions/CNN_dev_softpredictions.csv", dtype=np.float32)
 # max_softpredict = dev_softpredict.max(axis = 1)

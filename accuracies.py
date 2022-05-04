@@ -12,7 +12,8 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 from sklearn.preprocessing import OneHotEncoder
-
+import matplotlib.pyplot as plt
+import os
 
 def simple_nn_accuracy(file):
     data = np.loadtxt(file, dtype=int, delimiter=",", skiprows=1)
@@ -97,35 +98,27 @@ def pr_auc(truefile, probfile):
     classes = [0, 1, 2]
     labels = np.load(truefile, allow_pickle=True)
     probs = np.loadtxt(probfile,dtype=float)
-
-    # labels = torch.t(torch.from_numpy(labels))
-    # preds = F.one_hot(torch.from_numpy(preds),num_classes = len(classes))
-    # print(labels.size())
-    # print(labels)
-    # print(preds.size())   
-    # average_precision = AveragePrecision(num_classes=len(classes))
-    # print( average_precision(preds, labels))
-    # labels = np.load(truefile, allow_pickle=True)
-    # preds = np.loadtxt(predfile)
-    # if len(labels) > len(preds):
-    #     # print("labels len and pred len doesn't match")
-    #     labels = labels[: len(preds)]
-    # # print(f"{len(labels)} and t{len(preds)}")
-
     #convert labels into Nx3 binary matrix
     labels = label_binarize(labels, classes=classes)
     precision = dict()
     recall = dict()
     threshold =dict()
     accuracies = []
-    print(f"length of PR should be {len(classes)}")
+    plt.axis()
     for i in range(len(classes)):
         precision[i], recall[i], threshold[i] = precision_recall_curve(labels[:, i], probs[:, i])
         accuracies.append(auc(recall[i],precision[i]))
+        plt.plot(recall[i],precision[i],label=f"class {i}")
+    plt.legend()
+    figname = os.path.splitext(probfile)[0]
+    plt.title(figname)
+    plt.savefig(figname+'.png')
+    plt.show()
+    # plt.close()
     accuracy = np.mean(accuracies)
-    print(precision[0])
-    print(recall[0])
-    print(threshold[0])
+    print(f"length of PR should be {len(classes)} and is {len(precision)}."+
+        f"Num thresholds for each class is {len(threshold[0])}. "
+        f"Num precision for each class is {len(precision[0])}")
 
     return accuracy
 
@@ -239,10 +232,12 @@ if __name__ == "__main__":
         # print("***stay tuned***")
         truef = "datasets/processed/80nt_dev_labels.npy"
         classifiers = ["AdaBoost","CNN","SVM"]
-        for c in classifiers:
-            predf = "predictions/"+c+"_dev_predictions.csv"
-            predf2 = "predictions/"+c+"_dev_softpredictions.csv"
-            print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
-            print(f"{predf2} pr-auc={pr_auc(truef,predf2)}")
+        flanking = ["80nt"]
+        for f in flanking:
+            for c in classifiers:
+                predf = "predictions/"+f+"_"+c+"_dev_predictions.csv"
+                predf2 = "predictions/"+f+"_"+c+"_dev_softpredictions.csv"
+                print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
+                print(f"{predf2} pr-auc={pr_auc(truef,predf2)}")
     else:
         print("*** no valid model given ***")

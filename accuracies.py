@@ -3,7 +3,7 @@ from typing import Dict
 from xml.etree.ElementPath import prepare_descendant
 import numpy as np
 import sys
-from sklearn.metrics import precision_recall_curve, auc, average_precision_score
+from sklearn.metrics import precision_recall_curve, auc, average_precision_score, PrecisionRecallDisplay
 from torchmetrics import PrecisionRecallCurve, AveragePrecision
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 # from torchmetrics.functional import auc
@@ -78,14 +78,22 @@ def nn_pr_auc(file):
     accuracies = []
     for i in range(len(classes)):
         precision[i], recall[i], _ = precision_recall_curve(true[:, i], pred[:, i])
-        accuracies.append(auc(precision[i], recall[i]))
+        # accuracies.append(auc(precision[i], recall[i]))
         # accuracies.append(average_precision_score(true, pred))
-
+    precision["micro"], recall["micro"], _ = precision_recall_curve(true.ravel(), pred.ravel())
+    display = PrecisionRecallDisplay(
+        recall=recall["micro"],
+        precision=precision["micro"],
+    )
+    display.plot()
+    _ = display.ax_.set_title("Micro-averaged over all classes")
     # # print(accuracies)
-    accuracy = np.nanmean(accuracies)
+    # accuracy = np.nanmean(accuracies)
     # precision, recall, thresholds = precision_recall_curve(true, pred)
     # accuracy = auc(precision, recall)
-    return accuracy
+    
+    print(np.shape(precision))
+    return precision,recall
 
 
 def pr_auc(truefile, predfile):
@@ -221,7 +229,7 @@ if __name__ == "__main__":
 
     MODEL = sys.argv[1]
     if MODEL == "nnsplice":
-        outputfile = "output/merged_nn_preds0.csv"
+        outputfile = "output/merged_nn_400nt_preds0.csv"
         if len(sys.argv) > 2:
             outputfile = sys.argv[2]
         print(

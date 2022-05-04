@@ -6,15 +6,16 @@ import sys
 from torchsummary import summary
 
 
-def train(device):
-    TRAIN_SEQUENCES = np.load("datasets/processed/train_encoded.npy")
-    TRAIN_LABELS = np.load("datasets/processed/train_labels.npy")
+def train(device, num_NT):
+    
+    TRAIN_SEQUENCES = np.load("datasets/processed/{}nt_train_encoded.npy".format(num_NT))
+    TRAIN_LABELS = np.load("datasets/processed/{}nt_train_labels.npy".format(num_NT))
 
     # Number of gene sequences in the training corpus
     N_SEQUENCES = TRAIN_LABELS.shape[0]
 
     # Dimensions of a one-hot encoded sequence
-    HEIGHT = 82
+    HEIGHT = int(num_NT) + 2
     WIDTH = 4
 
     # Number of output classes
@@ -48,12 +49,13 @@ def train(device):
         loss.backward()
         optimizer.step()
 
-    torch.save(model, "models/CNN.pt")
+    torch.save(model, "models/{}nt_CNN.pt".format(num_NT))
 
 
-def predict(device):
-    DEV_SEQUENCES = np.load("datasets/processed/dev_encoded.npy")
-    HEIGHT = 82
+def predict(device, num_NT):
+    
+    DEV_SEQUENCES = np.load("datasets/processed/{}nt_dev_encoded.npy".format(num_NT))
+    HEIGHT = int(num_NT) + 2
     NUM_SEQUENCES = int(DEV_SEQUENCES.shape[0] / HEIGHT)
 
     model = torch.load("models/CNN.pt")
@@ -75,21 +77,23 @@ def predict(device):
 
     predictions = np.array(predictions)
     soft_predictions = np.array(soft_predictions)
-    print(soft_predictions)
-    print(f"pred {len(predictions)} sp {len(soft_predictions)} ")
-    np.savetxt("predictions/CNN_dev_predictions.csv", predictions, fmt="%d")
-    np.savetxt("predictions/CNN_dev_softpredictions.csv", soft_predictions, fmt="%f")
+    
+    # print(soft_predictions)
+    # print(f"pred {len(predictions)} sp {len(soft_predictions)} ")
+    # np.savetxt("predictions/{}nt_CNN_dev_predictions.csv".format(num_NT), predictions, fmt="%d")
+    # np.savetxt("predictions/{}nt_CNN_dev_softpredictions.csv".format(num_NT), soft_predictions, fmt="%f")
 
 
 if __name__ == "__main__":
     MODE = sys.argv[1]
+    num_NT = sys.argv[2]
 
     # Use CUDA if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     if MODE == "train":
-        train(device)
+        train(device, num_NT)
     elif MODE == "predict":
-        predict(device)
+        predict(device, num_NT)
     else:
         raise Exception("Mode not recognized")

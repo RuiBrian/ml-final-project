@@ -55,13 +55,13 @@ $ python accuracies.py nnsplice path_to_output.csv[default=output/merged_nn_pred
 Train the model:
 
 ```shell
-$ python main_CNN.py train
+$ python main_CNN.py train num_NT[default=80]
 ```
 
 Predict with the model:
 
 ```shell
-$ python main_CNN.py predict
+$ python main_CNN.py predict num_NT[default=80]
 ```
 
 Compute accuracy:

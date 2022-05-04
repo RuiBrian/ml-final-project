@@ -4,15 +4,17 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 
-dev_encoded = np.load('datasets/processed/dev_encoded.npy')
+num_NT = 80
+
+dev_encoded = np.load('datasets/processed/{}nt_dev_encoded.npy'.format(num_NT))
 print("Total dev test: ", int(dev_encoded.shape[0]/82))
 
-dev_labels = np.load('datasets/processed/dev_labels.npy')
+dev_labels = np.load('datasets/processed/{}nt_dev_labels.npy'.format(num_NT))
 print("Total true label=0: ", np.sum(dev_labels==0))
 print("Total true label=1: ", np.sum(dev_labels==1))
 print("Total true label=2: ", np.sum(dev_labels==2))
 
-dev_predict = np.loadtxt("predictions/CNN_dev_predictions.csv", dtype=int)
+dev_predict = np.loadtxt("predictions/{}nt_CNN_dev_predictions.csv".format(num_NT), dtype=int)
 print("Total predict label=0: ", np.sum(dev_predict==0))
 print("Total predict label=1: ", np.sum(dev_predict==1))
 print("Total predict label=2: ", np.sum(dev_predict==2))

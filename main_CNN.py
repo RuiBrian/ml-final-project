@@ -1,9 +1,11 @@
-from model_CNN import CNN
 import torch
 import torch.nn.functional as F
 import numpy as np
 import sys
+
+from model_CNN import CNN
 from torchsummary import summary
+from sklearn import metrics
 
 
 def train(device, num_NT):
@@ -58,7 +60,7 @@ def predict(device, num_NT):
     HEIGHT = int(num_NT) + 2
     NUM_SEQUENCES = int(DEV_SEQUENCES.shape[0] / HEIGHT)
 
-    model = torch.load("models/CNN.pt")
+    model = torch.load("models/{}nt_CNN.pt".format(num_NT))
     model.to(device)
     predictions = []
     soft_predictions = []
@@ -74,19 +76,21 @@ def predict(device, num_NT):
         soft_pred = s(logits).detach().numpy().flatten()
         predictions.append(pred.item())
         soft_predictions.append(soft_pred)
-
+    
+    true_labels = np.load("datasets/processed/{}nt_dev_labels.npy".format(num_NT)).ravel()
     predictions = np.array(predictions)
     soft_predictions = np.array(soft_predictions)
-    
-    # print(soft_predictions)
-    # print(f"pred {len(predictions)} sp {len(soft_predictions)} ")
-    # np.savetxt("predictions/{}nt_CNN_dev_predictions.csv".format(num_NT), predictions, fmt="%d")
-    # np.savetxt("predictions/{}nt_CNN_dev_softpredictions.csv".format(num_NT), soft_predictions, fmt="%f")
-
+    np.savetxt("predictions/{}nt_CNN_dev_predictions.csv".format(num_NT), predictions, fmt="%d")
+    np.savetxt("predictions/{}nt_CNN_dev_softpredictions.csv".format(num_NT), soft_predictions, fmt="%f")
+    print(f"Accuracy: {metrics.accuracy_score(true_labels, predictions)}")
 
 if __name__ == "__main__":
     MODE = sys.argv[1]
-    num_NT = sys.argv[2]
+    
+    if len(sys.argv) == 3:
+        num_NT = sys.argv[2]
+    elif len(sys.argv) == 2:
+        num_NT = 80
 
     # Use CUDA if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

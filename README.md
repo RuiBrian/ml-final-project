@@ -86,7 +86,7 @@ $ python accuracies.py ourmodel path_to_predictions.csv[default=predictions/CNN_
 Fit and predict:
 
 ```shell
-$ python main_SVM.py
+$ python main_SVM.py num_NT[default=80]
 ```
 
 ## AdaBoost
@@ -95,5 +95,5 @@ $ python main_SVM.py
 Fit and predict:
 
 ```shell
-$ python main_AdaBoost.py
+$ python main_AdaBoost.py num_NT[default=80]
 ```

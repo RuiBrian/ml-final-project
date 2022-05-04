@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import sys
 
 from sklearn.svm import LinearSVC
 from sklearn.preprocessing import OneHotEncoder
@@ -8,23 +9,22 @@ from sklearn import metrics
 from sklearn.calibration import CalibratedClassifierCV
 
 
-
-def fit_predict():
+def fit_predict(num_NT):
     # Load training data and labels
     X_train = pd.read_csv(
-        "datasets/processed/train_separated.csv", header=None, index_col=False
+        "datasets/processed/{}nt_train_separated.csv".format(num_NT), header=None, index_col=False
     )
     X_train = X_train.to_numpy()
     X_train = OneHotEncoder().fit_transform(X_train).astype(int).toarray()
-    y_train = np.load("datasets/processed/train_labels.npy").ravel()
+    y_train = np.load("datasets/processed/{}nt_train_labels.npy".format(num_NT)).ravel()
 
     # Load dev data and labels
     X_dev = pd.read_csv(
-        "datasets/processed/dev_separated.csv", header=None, index_col=False
+        "datasets/processed/{}nt_dev_separated.csv".format(num_NT), header=None, index_col=False
     )
     X_dev = X_dev.to_numpy()
     X_dev = OneHotEncoder().fit_transform(X_dev).astype(int).toarray()
-    y_dev = np.load("datasets/processed/dev_labels.npy").ravel()
+    y_dev = np.load("datasets/processed/{}nt_dev_labels.npy".format(num_NT)).ravel()
 
     # Fit SVM
     classifier = LinearSVC(C=1, random_state=0, dual=False)
@@ -36,12 +36,12 @@ def fit_predict():
 
     # Save predictions and print accuracy
     np.savetxt(
-        "predictions/SVM_dev_predictions.csv",
+        "predictions/{}nt_SVM_dev_predictions.csv".format(num_NT),
         y_pred,
         fmt="%i",
     )
     np.savetxt(
-        "predictions/SVM_dev_softpredictions.csv",
+        "predictions/{}nt_SVM_dev_softpredictions.csv".format(num_NT),
         y_softpred,
         fmt="%f",
     )
@@ -49,4 +49,9 @@ def fit_predict():
 
 
 if __name__ == "__main__":
-    fit_predict()
+    if len(sys.argv) == 2:
+        num_NT = sys.argv[1]
+    elif len(sys.argv) == 1:
+        num_NT = 80
+    
+    fit_predict(num_NT)

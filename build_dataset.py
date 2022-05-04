@@ -58,7 +58,7 @@ def build_dataset(num_NT):
     )
 
     # Sample smaller portions of dataframe
-    frac_totaldata = 0.1
+    frac_totaldata = 0.15
     neither_df = neither_df.sample(frac=frac_totaldata, replace=False, random_state=0)
     # exons_df = exons_df.sample(frac=frac_totaldata / 2, replace=False, random_state=0)
     donors_df = donors_df.sample(frac=frac_totaldata, replace=False, random_state=0)

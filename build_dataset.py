@@ -93,19 +93,20 @@ def nnsplice_dataset(
     filename, inputdir="datasets/raw/", outputdir="datasets/nnsplice/"
 ):
     if not filename.endswith(".fa"):
-        print("incorrect file")
+        print(f"incorrect file {filename}")
         return -1
     # add fasta title to separate each sequence
     newfilename = outputdir + "nnsplice_" + filename
     startChar = ">"
     i = 0
-    with open(inputdir + filename, "r") as names:
+    with open(inputdir + filename, "r") as sequences:
         with open(newfilename, "w") as updateFile:
-            for name in names:
-                updateFile.write(
-                    startChar + f"line{i} len={len(name)-1}\n" + name.rstrip() + "\n"
-                )
-                i += 1
+            for seq in sequences:
+                if seq[0] != startChar:
+                    updateFile.write(
+                        startChar + f"line{i} len={len(seq)-1}\n" + seq.rstrip() + "\n"
+                    )
+                    i += 1
     print(newfilename)
 
 
@@ -116,10 +117,14 @@ if __name__ == "__main__":
 
     MODE = sys.argv[1]
     if MODE == "nnsplice":
-        nnsplice_dataset("acceptors.fa")
-        nnsplice_dataset("donors.fa")
-        nnsplice_dataset("exons.fa")
-        nnsplice_dataset("neither.fa")
+        hfiles = os.listdir("datasets/raw")
+        for h in hfiles:        
+            nnsplice_dataset(h)
+
+        # nnsplice_dataset("acceptors.fa")
+        # nnsplice_dataset("donors.fa")
+        # nnsplice_dataset("exons.fa")
+        # nnsplice_dataset("neither.fa")
 
     elif MODE == "ourmodel":
         build_dataset()

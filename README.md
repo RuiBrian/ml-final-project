@@ -35,14 +35,14 @@ $ python build_dataset.py ourmodel
 Prepare dataset for NNsplice:
 
 ```shell
-$ python python build_dataset.py nnsplice
+$ python build_dataset.py nnsplice
 ```
 
 Run model: Copy and paste 1000 sequences to the website and submit. Save the HTML file.
 
 Scrape NNSplice output:
 ```shell
-$ python parse_baseline_output.py nnsplice
+$ python parse_baseline_output.py nnsplice [flanking sequence length]
 ```
 
 Compute accuracy:

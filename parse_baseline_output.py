@@ -81,7 +81,7 @@ def parse_nn_html(file):
     print(f'created {newfile} with {newfileidx2-newfileidx1} preds')
     return newfile 
 
-def merge_nn_output(files):
+def merge_nn_output(files,descriptor=""):
     headers = ['line num','true label','predicted label']
     data=np.empty((0,3),int)
     for f in files:
@@ -90,7 +90,8 @@ def merge_nn_output(files):
         data = np.append(data,np.loadtxt(f, dtype=int,delimiter = ",",skiprows=1),axis=0)
     # print(np.shape(data))
     suffix=0
-    newfile = f"output/merged_nn_preds{suffix}.csv"
+    descriptor="_"+descriptor+"_"
+    newfile = f"output/merged_nn_preds{descriptor}{suffix}.csv"
     while (os.path.exists(newfile)):
         suffix+=1
         newfile = f"output/merged_nn_preds{suffix}.csv"
@@ -104,21 +105,26 @@ if __name__ == "__main__":
         print("***Please specify baseline (nnsplice or spliceai)***")
     BASELINE = sys.argv[1]
     if BASELINE == "nnsplice":
-        if sys.argv ==3:
-            hfile = sys.argv[3]
-            if '.csv' not in hfile:
-                parse_nn_html(hfile)
-            else:
-                print("invalid raw output given (must be html)")
+        if len(sys.argv) < 3:
+            print("*** input flanking sequence length ***")
+            sys.exit()
         else:
-            hfiles = os.listdir("output")
-            parsed=[]
-            for h in hfiles:
-                if "nnsplice_" in h and '.csv' not in h:
-                    parsed.append("output/"+parse_nn_html(h))
-            # print(parsed)
-            #merge into one file
-            merge_nn_output(parsed)
+            des = sys.argv[2]
+            if len(sys.argv) ==4:
+                hfile = sys.argv[3]
+                if '.csv' not in hfile:
+                    parse_nn_html(hfile)
+                else:
+                    print("invalid raw output given (must be html)")
+            else:
+                hfiles = os.listdir("output")
+                parsed=[]
+                for h in hfiles:
+                    if "nnsplice_" in h and des in h and '.csv' not in h:
+                        parsed.append("output/"+parse_nn_html(h))
+                # print(parsed)
+                #merge into one file
+                merge_nn_output(parsed,descriptor=des)
 
             
     elif BASELINE == "spliceai":

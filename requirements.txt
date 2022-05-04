@@ -7,3 +7,4 @@ scikit-learn>=1.0.2
 bs4>=0.0.1
 torchmetrics>=0.8.1
 matplotlib>=3.5.2
+torchmetrics>=0.8.1

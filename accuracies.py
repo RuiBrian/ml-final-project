@@ -86,7 +86,7 @@ def nn_pr_auc(file):
     return accuracy
 
 
-def pr_auc(truefile, probfile):
+def pr_auc(truefile, probfile,predfile):
     """
     PR-AUC is the area under the precision-recall curve.
     truefile = labels of data (Nx1)
@@ -94,7 +94,12 @@ def pr_auc(truefile, probfile):
     """
     classes = [0, 1, 2]
     labels = np.load(truefile, allow_pickle=True)
+    # preds = np.loadtxt(predfile,dtype=int)
     probs = np.loadtxt(probfile,dtype=float)
+    # probpred = np.argmax(probs,1)
+    # print(len(probpred))
+    # print(len(np.where(probpred != preds)[0]))
+    # print(np.where(probpred != preds))
     #convert labels into Nx3 binary matrix
     labels = label_binarize(labels, classes=classes)
     precision = dict()
@@ -102,10 +107,14 @@ def pr_auc(truefile, probfile):
     threshold =dict()
     accuracies = []
     plt.axis()
+    #*** double check softpredictions match predictions - they do!
     for i in range(len(classes)):
-        precision[i], recall[i], threshold[i] = precision_recall_curve(labels[:, i], probs[:, i])
+        temp = labels[:,i]
+        precision[i], recall[i], threshold[i] = precision_recall_curve(temp, probs[:, i])
         accuracies.append(auc(recall[i],precision[i]))
         plt.plot(recall[i],precision[i],label=f"class {i}")
+        no_skill = len(temp[temp==1]) / len(temp) #*** check for bug here?
+        plt.plot([0, 1], [no_skill, no_skill], linestyle='--', label=f'Proportion of positive examples{i}')    
     plt.legend()
     plt.xlabel("Recall")
     plt.ylabel("Precision")
@@ -120,7 +129,6 @@ def pr_auc(truefile, probfile):
     #     f"Num precision for each class is {len(precision[0])}")
 
     return accuracy
-
 
 def nn_top_k_accuracy(file):
     # TODO
@@ -164,6 +172,6 @@ if __name__ == "__main__":
                 predf = "predictions/"+f+"_"+c+"_dev_predictions.csv"
                 predf2 = "predictions/"+f+"_"+c+"_dev_softpredictions.csv"
                 print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
-                print(f"{predf2} pr-auc={pr_auc(truef,predf2)}")
+                print(f"{predf2} pr-auc={pr_auc(truef,predf2,predf)}")
     else:
         print("*** no valid model given ***")

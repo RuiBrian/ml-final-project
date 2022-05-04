@@ -16,8 +16,14 @@ dev_predict = np.loadtxt("predictions/CNN_dev_predictions.csv", dtype=int)
 print("Total predict label=0: ", np.sum(dev_predict==0))
 print("Total predict label=1: ", np.sum(dev_predict==1))
 print("Total predict label=2: ", np.sum(dev_predict==2))
-
 print("Accuracy: ", np.sum(np.transpose(dev_labels)[0]==dev_predict)/int(dev_encoded.shape[0]/82))
+
+# dev_softpredict = np.loadtxt("predictions/CNN_dev_softpredictions.csv", dtype=np.float32)
+# max_softpredict = dev_softpredict.max(axis = 1)
+# print("Total softpredict label=0: ", np.sum(dev_softpredict[:,0] == max_softpredict))
+# print("Total softpredict label=1: ", np.sum(dev_softpredict[:,1] == max_softpredict))
+# print("Total softpredict label=2: ", np.sum(dev_softpredict[:,2] == max_softpredict))
+
 
 # TRAIN_SEQUENCES = np.load("datasets/processed/train_encoded.npy")
 # print(TRAIN_SEQUENCES.shape)

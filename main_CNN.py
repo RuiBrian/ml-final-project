@@ -76,7 +76,7 @@ def predict(device):
     predictions = np.array(predictions)
     soft_predictions = np.array(soft_predictions)
     print(soft_predictions)
-    print(f"pred l{len(predictions)} sp{len(soft_predictions)} ")
+    print(f"pred {len(predictions)} sp {len(soft_predictions)} ")
     np.savetxt("predictions/CNN_dev_predictions.csv", predictions, fmt="%d")
     np.savetxt("predictions/CNN_dev_softpredictions.csv", soft_predictions, fmt="%f")
 

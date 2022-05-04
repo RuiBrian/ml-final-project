@@ -59,7 +59,9 @@ def predict(device):
     model = torch.load("models/CNN.pt")
     model.to(device)
     predictions = []
+    soft_predictions = []
 
+    s = torch.nn.Softmax(dim=1)
     for i in range(0, DEV_SEQUENCES.shape[0], HEIGHT):
         x = torch.from_numpy(DEV_SEQUENCES[i : i + HEIGHT].astype(np.float32)).to(
             device
@@ -67,10 +69,16 @@ def predict(device):
         logits = model(x)
 
         pred = torch.max(logits, 1)[1]
+        soft_pred = s(logits).detach().numpy().flatten()
         predictions.append(pred.item())
+        soft_predictions.append(soft_pred)
 
     predictions = np.array(predictions)
+    soft_predictions = np.array(soft_predictions)
+    print(soft_predictions)
+    print(f"pred l{len(predictions)} sp{len(soft_predictions)} ")
     np.savetxt("predictions/CNN_dev_predictions.csv", predictions, fmt="%d")
+    np.savetxt("predictions/CNN_dev_softpredictions.csv", soft_predictions, fmt="%f")
 
 
 if __name__ == "__main__":

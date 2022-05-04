@@ -32,6 +32,11 @@ def fit_predict():
         clf.predict(X_dev).astype(int),
         fmt="%i",
     )
+    np.savetxt(
+        "predictions/AdaBoost_dev_softpredictions.csv",
+        clf.predict_proba(X_dev).astype(float),
+        fmt="%f",
+    )
     print(f"Accuracy: {clf.score(X_dev, y_dev)}")
 
 

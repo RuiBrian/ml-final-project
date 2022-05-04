@@ -57,8 +57,8 @@ def build_dataset(num_NT):
         f"datasets/raw/{num_NT}nt_acceptors.fa", header=None, index_col=False
     )
 
-    # Sample smaller portions of dataframe
-    frac_totaldata = 0.15
+    # Sample smaller portions of dataframe (50% for 80nt and 10% for 400nt)
+    frac_totaldata = 0.5 if num_NT == 80 else 0.1
     neither_df = neither_df.sample(frac=frac_totaldata, replace=False, random_state=0)
     # exons_df = exons_df.sample(frac=frac_totaldata / 2, replace=False, random_state=0)
     donors_df = donors_df.sample(frac=frac_totaldata, replace=False, random_state=0)

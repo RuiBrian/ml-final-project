@@ -90,8 +90,8 @@ def merge_nn_output(files,descriptor=""):
         data = np.append(data,np.loadtxt(f, dtype=int,delimiter = ",",skiprows=1),axis=0)
     # print(np.shape(data))
     suffix=0
-    descriptor="_"+descriptor+"_"
-    newfile = f"output/merged_nn_preds{descriptor}{suffix}.csv"
+    descriptor=descriptor+"_"
+    newfile = f"output/{descriptor}merged_nn_preds_{suffix}.csv"
     while (os.path.exists(newfile)):
         suffix+=1
         newfile = f"output/merged_nn_preds{suffix}.csv"

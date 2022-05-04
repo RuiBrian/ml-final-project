@@ -78,23 +78,25 @@ def nn_pr_auc(file):
     accuracies = []
     for i in range(len(classes)):
         precision[i], recall[i], _ = precision_recall_curve(true[:, i], pred[:, i])
-        accuracies.append(auc(precision[i], recall[i]))
+        accuracies.append(auc(recall[i],precision[i]))
         # accuracies.append(average_precision_score(true, pred))
 
     # # print(accuracies)
-    accuracy = np.nanmean(accuracies)
+    accuracy = np.mean(accuracies)
     # precision, recall, thresholds = precision_recall_curve(true, pred)
     # accuracy = auc(precision, recall)
     return accuracy
 
 
-def pr_auc(truefile, predfile):
+def pr_auc(truefile, probfile):
     """
     PR-AUC is the area under the precision-recall curve.
+    truefile = labels of data (Nx1)
+    probfile = probabality sample belongs to each class (Nx3)
     """
     classes = [0, 1, 2]
     labels = np.load(truefile, allow_pickle=True)
-    preds = np.loadtxt(predfile,dtype=int)
+    probs = np.loadtxt(probfile,dtype=float)
 
     # labels = torch.t(torch.from_numpy(labels))
     # preds = F.one_hot(torch.from_numpy(preds),num_classes = len(classes))
@@ -109,16 +111,22 @@ def pr_auc(truefile, predfile):
     #     # print("labels len and pred len doesn't match")
     #     labels = labels[: len(preds)]
     # # print(f"{len(labels)} and t{len(preds)}")
+
+    #convert labels into Nx3 binary matrix
     labels = label_binarize(labels, classes=classes)
-    preds = label_binarize(preds, classes=classes)
-#
     precision = dict()
     recall = dict()
+    threshold =dict()
     accuracies = []
+    print(f"length of PR should be {len(classes)}")
     for i in range(len(classes)):
-        precision[i], recall[i], _ = precision_recall_curve(labels[:, i], preds[:, i])
-        accuracies.append(auc(precision[i], recall[i]))
-    accuracy = np.nanmean(accuracies)
+        precision[i], recall[i], threshold[i] = precision_recall_curve(labels[:, i], probs[:, i])
+        accuracies.append(auc(recall[i],precision[i]))
+    accuracy = np.mean(accuracies)
+    print(precision[0])
+    print(recall[0])
+    print(threshold[0])
+
     return accuracy
 
 
@@ -221,21 +229,20 @@ if __name__ == "__main__":
 
     MODEL = sys.argv[1]
     if MODEL == "nnsplice":
-        outputfile = "output/merged_nn_preds0.csv"
-        if len(sys.argv) > 2:
-            outputfile = sys.argv[2]
-        print(
-            f"{outputfile} Accuracy is {simple_nn_accuracy(outputfile)*100}% and PR-AUC = {nn_pr_auc(outputfile)*100}%"
-        )
+        flanking = ["80nt","400nt"]
+        for f in flanking:
+            outputfile = "output/"+f+"_merged_nn_preds_0.csv"
+            print(f"{outputfile} Accuracy is {simple_nn_accuracy(outputfile)}")
+            print(f"and PR-AUC = {nn_pr_auc(outputfile)}")
+            
     elif MODEL == "ourmodel":
         # print("***stay tuned***")
-        truef = "datasets/processed/dev_labels.npy"
-        predf = "predictions/CNN_dev_predictions.csv"
-        if len(sys.argv) > 2:
-            truef = sys.argv[2]
-            if len(sys.argv) > 3:
-                predf = sys.argv[3]
-        print(f"simple accuracy={simple_accuracy(truef,predf)}")
-        print(f"pr-auc={pr_auc(truef,predf)}")
+        truef = "datasets/processed/80nt_dev_labels.npy"
+        classifiers = ["AdaBoost","CNN","SVM"]
+        for c in classifiers:
+            predf = "predictions/"+c+"_dev_predictions.csv"
+            predf2 = "predictions/"+c+"_dev_softpredictions.csv"
+            print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
+            print(f"{predf2} pr-auc={pr_auc(truef,predf2)}")
     else:
         print("*** no valid model given ***")

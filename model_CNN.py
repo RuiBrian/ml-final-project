@@ -17,16 +17,17 @@ class CNN(torch.nn.Module):
             nn.Conv2d(1, 128, kernel_size=1, stride=1),
             nn.BatchNorm2d(128),
             nn.ReLU(),
-            nn.AvgPool2d(kernel_size=1, stride=1),
+            # nn.AvgPool2d(kernel_size=1, stride=1),
            
-            nn.Conv2d(128, 128, kernel_size=2, stride=2),
-            nn.BatchNorm2d(128),
+            nn.Conv2d(128, 256, kernel_size=2, stride=2),
+            nn.BatchNorm2d(256),
             nn.ReLU(),
-            nn.AvgPool2d(kernel_size=1, stride=1),
+            # nn.AvgPool2d(kernel_size=1, stride=1),
            
-            nn.Conv2d(128, 64, kernel_size=1, stride=2),
+            nn.Conv2d(256, 64, kernel_size=1, stride=2),
             nn.BatchNorm2d(64),
             nn.ReLU(),
+            nn.Dropout(p=0.5),
             nn.AvgPool2d(kernel_size=1, stride=1),
            
             # nn.Conv2d(64, 32, kernel_size=1, stride=2),
@@ -42,7 +43,7 @@ class CNN(torch.nn.Module):
 
         self.linear_layers = nn.Sequential(
             nn.Linear(1344, 24), 
-            nn.ReLU(), 
+            nn.ReLU(),
             nn.Linear(24, n_classes)
         )
 

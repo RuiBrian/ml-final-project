@@ -10,8 +10,10 @@ from sklearn import metrics
 
 def train(device, num_NT):
     
-    TRAIN_SEQUENCES = np.load("datasets/processed/{}nt_train_encoded.npy".format(num_NT))
-    TRAIN_LABELS = np.load("datasets/processed/{}nt_train_labels.npy".format(num_NT))
+    TRAIN_SEQUENCES = np.load(
+        "datasets/processed/{}nt_train_encoded.npy".format(num_NT))
+    TRAIN_LABELS = np.load(
+        "datasets/processed/{}nt_train_labels.npy".format(num_NT))
 
     # Number of gene sequences in the training corpus
     N_SEQUENCES = TRAIN_LABELS.shape[0]
@@ -24,11 +26,14 @@ def train(device, num_NT):
     N_CLASSES = 3
 
     # Parameters
-    LEARNING_RATE = 0.001
-    EPOCHS = 28000
+    LEARNING_RATE = 0.0001
+    EPOCHS = 500000
+    print(f"Learning rate: {LEARNING_RATE}")
+    print(f"Epochs: {EPOCHS}")
 
     # Initialize model and optimizer
     model = CNN(input_height=HEIGHT, input_width=WIDTH, n_classes=N_CLASSES)
+    print(model)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
@@ -36,8 +41,10 @@ def train(device, num_NT):
     for step in range(0, EPOCHS, HEIGHT):
         x = torch.from_numpy(
             TRAIN_SEQUENCES[step : step + HEIGHT].astype(np.float32)
-        ).to(device)
-        y = torch.from_numpy(TRAIN_LABELS[cur_label_index].astype(int)).to(device)
+            ).to(device)
+        y = torch.from_numpy(
+            TRAIN_LABELS[cur_label_index].astype(int)
+            ).to(device)
         cur_label_index += 1
 
         # Forward pass: get logits for x
@@ -56,7 +63,8 @@ def train(device, num_NT):
 
 def predict(device, num_NT):
     
-    DEV_SEQUENCES = np.load("datasets/processed/{}nt_dev_encoded.npy".format(num_NT))
+    DEV_SEQUENCES = np.load(
+        "datasets/processed/{}nt_dev_encoded.npy".format(num_NT))
     HEIGHT = int(num_NT) + 2
     NUM_SEQUENCES = int(DEV_SEQUENCES.shape[0] / HEIGHT)
 
@@ -67,9 +75,8 @@ def predict(device, num_NT):
 
     s = torch.nn.Softmax(dim=1)
     for i in range(0, DEV_SEQUENCES.shape[0], HEIGHT):
-        x = torch.from_numpy(DEV_SEQUENCES[i : i + HEIGHT].astype(np.float32)).to(
-            device
-        )
+        x = torch.from_numpy(DEV_SEQUENCES[i : i + HEIGHT].astype(np.float32)
+            ).to(device)
         logits = model(x)
 
         pred = torch.max(logits, 1)[1]
@@ -77,11 +84,14 @@ def predict(device, num_NT):
         predictions.append(pred.item())
         soft_predictions.append(soft_pred)
     
-    true_labels = np.load("datasets/processed/{}nt_dev_labels.npy".format(num_NT)).ravel()
+    true_labels = np.load(
+        "datasets/processed/{}nt_dev_labels.npy".format(num_NT)).ravel()
     predictions = np.array(predictions)
     soft_predictions = np.array(soft_predictions)
-    np.savetxt("predictions/{}nt_CNN_dev_predictions.csv".format(num_NT), predictions, fmt="%d")
-    np.savetxt("predictions/{}nt_CNN_dev_softpredictions.csv".format(num_NT), soft_predictions, fmt="%f")
+    np.savetxt("predictions/{}nt_CNN_dev_predictions.csv".format(num_NT), 
+               predictions, fmt="%d")
+    np.savetxt("predictions/{}nt_CNN_dev_softpredictions.csv".format(num_NT), 
+               soft_predictions, fmt="%f")
     print(f"Accuracy: {metrics.accuracy_score(true_labels, predictions)}")
 
 if __name__ == "__main__":

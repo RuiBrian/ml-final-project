@@ -20,6 +20,12 @@ def simple_nn_accuracy(file):
     true = data[:, 1]
     pred = data[:, 2]
     comparison = true == pred
+    # NNsplice classifying it as both we decide to count correct, so adjust
+    for i in range(len(pred)):
+        if pred[i] == 3:
+            if not true[i] == 0:
+                comparison[i] = True
+    
     # incorrect = np.where(true!=pred)
     # print(len(incorrect[0]))
     # print(len(true))

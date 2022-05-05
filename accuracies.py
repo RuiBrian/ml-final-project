@@ -3,7 +3,7 @@ from typing import Dict
 from xml.etree.ElementPath import prepare_descendant
 import numpy as np
 import sys
-from sklearn.metrics import precision_recall_curve, auc, average_precision_score
+from sklearn.metrics import precision_recall_curve, auc, average_precision_score, confusion_matrix
 from torchmetrics import PrecisionRecallCurve, AveragePrecision
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 # from torchmetrics.functional import auc
@@ -20,11 +20,11 @@ def simple_nn_accuracy(file):
     true = data[:, 1]
     pred = data[:, 2]
     comparison = true == pred
-    # NNsplice classifying it as both we decide to count correct, so adjust
-    for i in range(len(pred)):
-        if pred[i] == 3:
-            if not true[i] == 0:
-                comparison[i] = True
+    # # NNsplice classifying it as both we decide to count correct, so adjust
+    # for i in range(len(pred)):
+    #     if pred[i] == 3:
+    #         if not true[i] == 0:
+    #             comparison[i] = True
     
     # incorrect = np.where(true!=pred)
     # print(len(incorrect[0]))
@@ -41,11 +41,21 @@ def simple_accuracy(truefile, predfile):
         print("labels len and pred len doesn't match")
         return
     comparison = (labels == preds)
+    classes = np.unique(labels)
+    acc=dict()
+    print(len(preds))
+    for i in classes:
+        temp_l = labels[np.where(labels==i)]
+        print(f"class {i} {len(temp_l)}")
+        temp_preds = preds[np.where(labels==i)]
+        temp_comp = (temp_l==temp_preds)
+        acc[i]=((np.sum(temp_comp)/temp_comp.size))
+
     # incorrect = np.where(comparison=False)
     # print(incorrect)
     # accuracy = len(incorrect[0])/len(labels)
     accuracy = ((np.sum(comparison)) / comparison.size).astype(np.float64)
-    return accuracy
+    return accuracy,acc
 
 
 def nn_pr_auc(file):
@@ -58,11 +68,16 @@ def nn_pr_auc(file):
     classes = [0, 1, 2]
     true = label_binarize(data[:, 1], classes=classes)
     pred = label_binarize(data[:, 2], classes=classes)
+    # for i in range(len(pred)):
+    #     if pred[i] == 3:
+    #         if not true[i] == 0:
+    #             comparison[i] = True
     precision = dict()
     recall = dict()
     threshold =dict()
     accuracies=dict()
     accuracies = []
+    print(confusion_matrix(true,pred,labels=classes))
     plt.axis()
     for i in range(len(classes)):
         precision[i], recall[i], threshold[i] = precision_recall_curve(true[:, i], pred[:, i])
@@ -71,11 +86,11 @@ def nn_pr_auc(file):
         # accuracies.append(average_precision_score(true, pred))
     plt.legend()
     accuracy = np.mean(accuracies)*100
-    figname = os.path.splitext(file)[0][:-2]
+    figname = os.path.splitext(file)[0]
     plt.xlabel("Recall")
     plt.ylabel("Precision")
     plt.title(figname+'_'+str(accuracy))
-    plt.savefig(figname+'_'+str(accuracy)+'.png')
+    plt.savefig(figname+'.png')
     plt.show()    
     # # print(accuracies)
     print(threshold)
@@ -94,27 +109,35 @@ def pr_auc(truefile, probfile,predfile):
     """
     classes = [0, 1, 2]
     labels = np.load(truefile, allow_pickle=True)
-    # preds = np.loadtxt(predfile,dtype=int)
+    preds = np.loadtxt(predfile,dtype=int)
+    binpreds = label_binarize(preds, classes=classes)
     probs = np.loadtxt(probfile,dtype=float)
     # probpred = np.argmax(probs,1)
     # print(len(probpred))
     # print(len(np.where(probpred != preds)[0]))
     # print(np.where(probpred != preds))
     #convert labels into Nx3 binary matrix
-    labels = label_binarize(labels, classes=classes)
+    binlabels = label_binarize(labels, classes=classes)
     precision = dict()
     recall = dict()
     threshold =dict()
     accuracies = []
     plt.axis()
     #*** double check softpredictions match predictions - they do!
+    print(confusion_matrix(labels,preds,labels=classes))
+
+    # double check 99% canonical in dataset - want to be useful for noncanonical and not be trivial
+    # try on just acceptor and donor with 99% canonical 
+    # double check feature importance in SVM 
+    # write up what you've ruled out 
     for i in range(len(classes)):
-        temp = labels[:,i]
+        temp = binlabels[:,i]
         precision[i], recall[i], threshold[i] = precision_recall_curve(temp, probs[:, i])
         accuracies.append(auc(recall[i],precision[i]))
         plt.plot(recall[i],precision[i],label=f"class {i}")
         no_skill = len(temp[temp==1]) / len(temp) #*** check for bug here?
-        plt.plot([0, 1], [no_skill, no_skill], linestyle='--', label=f'Proportion of positive examples{i}')    
+        plt.plot([0, 1], [no_skill, no_skill], linestyle='--', label=f'Baseline (Positive Proportion of {i})')  
+  
     plt.legend()
     plt.xlabel("Recall")
     plt.ylabel("Precision")

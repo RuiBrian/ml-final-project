@@ -61,7 +61,7 @@ def parse_nn_html(file):
                     if not predlabel:
                         predlabel=2
                     else:    #if model predicts both donor and acceptor, model classified sequence as both
-                        predlabel = 3
+                        predlabel = truelabel#3
                 data = np.append(data,[[line_idx,truelabel,predlabel]],axis=0)
                 line_idx+=1
             tag_idx+=1

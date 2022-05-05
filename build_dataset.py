@@ -45,16 +45,16 @@ def one_hot_encode(file, num_NT):
 def build_dataset(num_NT):
     # Load into dataframes
     neither_df = pd.read_csv(
-        f"datasets/raw/{num_NT}nt_neither.fa", header=None, index_col=False
+        f"datasets/raw/{num_NT}nt_neither.txt", header=None, index_col=False
     )
     # exons_df = pd.read_csv(
-    #     f"datasets/raw/{num_NT}nt_exons.fa", header=None, index_col=False
+    #     f"datasets/raw/{num_NT}nt_exons.txt", header=None, index_col=False
     # )
     donors_df = pd.read_csv(
-        f"datasets/raw/{num_NT}nt_donors.fa", header=None, index_col=False
+        f"datasets/raw/{num_NT}nt_donors.txt", header=None, index_col=False
     )
     acceptors_df = pd.read_csv(
-        f"datasets/raw/{num_NT}nt_acceptors.fa", header=None, index_col=False
+        f"datasets/raw/{num_NT}nt_acceptors.txt", header=None, index_col=False
     )
 
     # Sample smaller portions of dataframe (50% for 80nt and 10% for 400nt)

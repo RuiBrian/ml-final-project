@@ -64,21 +64,9 @@ Predict with the model:
 $ python main_CNN.py predict num_NT[default=80]
 ```
 
-Compute accuracy:
-
-```shell
-$ 
-```
-
 Build dataset:
 ```shell
 $ python build_dataset.py
-```
-
-Compute accuracy:
-
-```shell
-$ python accuracies.py ourmodel path_to_predictions.csv[default=predictions/CNN_dev_predictions.csv] path_to_labels.npy[default=datasets/processed/dev_labels.npy]
 ```
 
 ## SVM
@@ -96,4 +84,10 @@ Fit and predict:
 
 ```shell
 $ python main_AdaBoost.py num_NT[default=80]
+```
+
+## Compute Accuracy
+
+```shell
+$ python accuracies.py [nnsplice or ourmodel] [80 or 400]
 ```

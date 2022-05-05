@@ -58,6 +58,6 @@ if __name__ == "__main__":
     num_NT = 80
 
     if len(sys.argv) == 2:
-        num_NT = sys.argv[1]
+        num_NT = int(sys.argv[1])
 
     fit_predict(num_NT)

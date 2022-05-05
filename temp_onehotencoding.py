@@ -1,4 +1,4 @@
-import os   
+import os
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
@@ -10,7 +10,7 @@ for filename in os.listdir(dir_data):
         fasta_contents = fasta_file.readlines()
         # for line in fasta_contents:
         #     print(line, '\n')
-        
+
 print(fasta_contents[5])
 
 line = []

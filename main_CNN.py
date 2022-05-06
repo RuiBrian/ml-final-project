@@ -73,7 +73,7 @@ def predict(device, num_NT):
         logits = model(x)
 
         pred = torch.max(logits, 1)[1]
-        soft_pred = s(logits).detach().numpy().flatten()
+        soft_pred = s(logits).detach().cpu().numpy().flatten()
         predictions.append(pred.item())
         soft_predictions.append(soft_pred)
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         num_NT = int(sys.argv[2])
     elif len(sys.argv) == 2:
         num_NT = 80
-        
+
     if num_NT != 80 and num_NT != 400:
         raise Exception("Flanking sequence must be 80 or 400")
 

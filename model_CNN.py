@@ -10,27 +10,27 @@ class CNN(torch.nn.Module):
         self.input_height = input_height
         self.input_width = input_width
         self.n_classes = n_classes
+        self.n_conv_output = 640 if self.input_height == 82 else 3200
 
-        # ConvNet architecture
+        # Convolutional Layers
         self.conv_layers = nn.Sequential(
-            # TODO: Tweak model architecture
-            nn.Conv2d(1, 128, kernel_size=1, stride=1),
+            nn.Conv2d(1, 128, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(),
-            nn.Conv2d(128, 256, kernel_size=2, stride=2),
+            nn.AvgPool2d(kernel_size=2),
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=2),
             nn.BatchNorm2d(256),
             nn.ReLU(),
-            nn.Conv2d(256, 64, kernel_size=1, stride=2),
+            nn.AvgPool2d(kernel_size=2),
+            nn.Conv2d(256, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
-            # nn.Dropout(p=0.5),
-            # nn.AvgPool2d(kernel_size=1, stride=1),
+            nn.AvgPool2d(kernel_size=2),
         )
 
+        # Dense Linear Layers
         self.linear_layers = nn.Sequential(
-            nn.Linear(6464, 24), 
-            nn.ReLU(), 
-            nn.Linear(24, n_classes)
+            nn.Linear(self.n_conv_output, 24), nn.ReLU(), nn.Linear(24, n_classes)
         )
 
     def forward(self, x):

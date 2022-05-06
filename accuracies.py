@@ -197,22 +197,25 @@ if __name__ == "__main__":
 
     MODEL = sys.argv[1]
     if MODEL == "nnsplice":
-        flanking = ["80nt", "400nt"]
+        flanking = ["80", "400"]
         for f in flanking:
-            outputfile = "output/" + f + "_merged_nn_preds_0.csv"
+            outputfile = f"output/{f}nt_merged_nn_preds_0.csv"
             print(f"{outputfile} Accuracy is {simple_nn_accuracy(outputfile)}")
             print(f"and PR-AUC = {nn_pr_auc(outputfile)}")
 
     elif MODEL == "ourmodel":
-        # print("***stay tuned***")
-        truef = "datasets/processed/80nt_dev_labels.npy"
+        
+        if len(sys.argv) == 3:
+            flanking = sys.argv[2]
+        else:
+            raise Exception("Flanking sequence must be 80 or 400")
+        
+        truef = f"datasets/processed/{flanking}nt_dev_labels.npy"
         classifiers = ["AdaBoost", "CNN", "SVM"]
-        flanking = ["80nt"]
-        for f in flanking:
-            for c in classifiers:
-                predf = f"predictions/{f}_{c}_dev_predictions.csv"
-                predf2 = f"predictions/{f}_{c}_dev_softpredictions.csv"
-                print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
-                print(f"{predf2} pr-auc={pr_auc(truef,predf2,predf)}")
+        for c in classifiers:
+            predf = f"predictions/{flanking}nt_{c}_dev_predictions.csv"
+            predf2 = f"predictions/{flanking}nt_{c}_dev_softpredictions.csv"
+            print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
+            print(f"{predf2} pr-auc={pr_auc(truef,predf2,predf)}")
     else:
         print("*** no valid model given ***")

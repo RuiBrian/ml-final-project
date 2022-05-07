@@ -37,7 +37,7 @@ class CNN(torch.nn.Module):
         # Add channel and batch dimension
         x = x.unsqueeze(0)  # One channel
         x = x.unsqueeze(0)  # Batch size of 1
-
+        
         # Pass through network layers
         x = self.conv_layers(x)
         x = x.view(x.size(0), -1)

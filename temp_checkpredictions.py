@@ -5,18 +5,18 @@ import torch.nn.functional as F
 import torch.nn as nn
 from sklearn.metrics import accuracy_score
 
-num_NT = 80
+flanking_seq = 80
 
-dev_encoded = np.load("datasets/processed/{}nt_dev_encoded.npy".format(num_NT))
+dev_encoded = np.load("datasets/processed/{}nt_dev_encoded.npy".format(flanking_seq))
 print("Total dev test: ", int(dev_encoded.shape[0] / 82))
 
-dev_labels = np.load("datasets/processed/{}nt_dev_labels.npy".format(num_NT))
+dev_labels = np.load("datasets/processed/{}nt_dev_labels.npy".format(flanking_seq))
 print("Total true label=0: ", np.sum(dev_labels == 0))
 print("Total true label=1: ", np.sum(dev_labels == 1))
 print("Total true label=2: ", np.sum(dev_labels == 2))
 
 dev_predict = np.loadtxt(
-    "predictions/{}nt_CNN_dev_predictions.csv".format(num_NT), dtype=int
+    "predictions/{}nt_CNN_dev_predictions.csv".format(flanking_seq), dtype=int
 )
 print("Total predict label=0: ", np.sum(dev_predict == 0))
 print("Total predict label=1: ", np.sum(dev_predict == 1))

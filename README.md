@@ -52,16 +52,16 @@ $ python accuracies.py nnsplice path_to_output.csv[default=output/merged_nn_pred
 
 ## CNN model
 
-Train the model:
+Train the model and predict on dev dataset:
 
 ```shell
-$ python main_CNN.py train num_NT[default=80]
+$ python main_CNN.py train flanking_seq[default=80]
 ```
 
-Predict with the model:
+Predict on test dataset:
 
 ```shell
-$ python main_CNN.py predict num_NT[default=80]
+$ python main_CNN.py predict flanking_seq[default=80]
 ```
 
 Build dataset:
@@ -74,7 +74,7 @@ $ python build_dataset.py
 Fit and predict:
 
 ```shell
-$ python main_SVM.py num_NT[default=80]
+$ python main_SVM.py flanking_seq[default=80]
 ```
 
 ## AdaBoost
@@ -83,7 +83,7 @@ $ python main_SVM.py num_NT[default=80]
 Fit and predict:
 
 ```shell
-$ python main_AdaBoost.py num_NT[default=80]
+$ python main_AdaBoost.py flanking_seq[default=80]
 ```
 
 ## Compute Accuracy

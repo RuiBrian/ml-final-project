@@ -7,13 +7,13 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
 
-def one_hot_encode(file, num_NT):
+def one_hot_encode(file, flanking_seq):
     # Prevent truncation of long strings
     pd.set_option("display.max_colwidth", None)
 
     # Load file into dataframe
     df = pd.read_csv(
-        f"datasets/processed/{num_NT}nt_{file}.csv", header=None, index_col=False
+        f"datasets/processed/{flanking_seq}nt_{file}.csv", header=None, index_col=False
     )
 
     # Split labels and sequences
@@ -27,7 +27,7 @@ def one_hot_encode(file, num_NT):
     )
 
     sequences_df.to_csv(
-        f"datasets/processed/{num_NT}nt_{file}_separated.csv", header=None, index=False
+        f"datasets/processed/{flanking_seq}nt_{file}_separated.csv", header=None, index=False
     )
 
     # Perform one-hot encoding with pd.get_dummies()
@@ -36,29 +36,29 @@ def one_hot_encode(file, num_NT):
     sequences_df = pd.get_dummies(sequences_df)
 
     # Convert to numpy arrays and save as .npy
-    np.save(f"datasets/processed/{num_NT}nt_{file}_labels.npy", labels_df.to_numpy())
+    np.save(f"datasets/processed/{flanking_seq}nt_{file}_labels.npy", labels_df.to_numpy())
     np.save(
-        f"datasets/processed/{num_NT}nt_{file}_encoded.npy", sequences_df.to_numpy()
+        f"datasets/processed/{flanking_seq}nt_{file}_encoded.npy", sequences_df.to_numpy()
     )
 
 
-def build_dataset(num_NT):
+def build_dataset(flanking_seq):
     # Load into dataframes
     neither_df = pd.read_csv(
-        f"datasets/raw/{num_NT}nt_neither.txt", header=None, index_col=False
+        f"datasets/raw/{flanking_seq}nt_neither.txt", header=None, index_col=False
     )
     # exons_df = pd.read_csv(
-    #     f"datasets/raw/{num_NT}nt_exons.txt", header=None, index_col=False
+    #     f"datasets/raw/{flanking_seq}nt_exons.txt", header=None, index_col=False
     # )
     donors_df = pd.read_csv(
-        f"datasets/raw/{num_NT}nt_donors.txt", header=None, index_col=False
+        f"datasets/raw/{flanking_seq}nt_donors.txt", header=None, index_col=False
     )
     acceptors_df = pd.read_csv(
-        f"datasets/raw/{num_NT}nt_acceptors.txt", header=None, index_col=False
+        f"datasets/raw/{flanking_seq}nt_acceptors.txt", header=None, index_col=False
     )
 
     # Sample smaller portions of dataframe (50% for 80nt and 10% for 400nt)
-    frac_totaldata = 0.5 if num_NT == 80 else 0.1
+    frac_totaldata = 0.5 if flanking_seq == 80 else 0.1
     neither_df = neither_df.sample(frac=frac_totaldata, replace=False, random_state=0)
     # exons_df = exons_df.sample(frac=frac_totaldata / 2, replace=False, random_state=0)
     donors_df = donors_df.sample(frac=frac_totaldata, replace=False, random_state=0)
@@ -97,9 +97,9 @@ def build_dataset(num_NT):
     print(f"Number of test examples: {test.shape[0]}")
 
     # Write to CSV files
-    train.to_csv(f"datasets/processed/{num_NT}nt_train.csv", header=None, index=False)
-    dev.to_csv(f"datasets/processed/{num_NT}nt_dev.csv", header=None, index=False)
-    test.to_csv(f"datasets/processed/{num_NT}nt_test.csv", header=None, index=False)
+    train.to_csv(f"datasets/processed/{flanking_seq}nt_train.csv", header=None, index=False)
+    dev.to_csv(f"datasets/processed/{flanking_seq}nt_dev.csv", header=None, index=False)
+    test.to_csv(f"datasets/processed/{flanking_seq}nt_test.csv", header=None, index=False)
 
 
 def nnsplice_dataset(
@@ -145,17 +145,17 @@ if __name__ == "__main__":
             print("***Please specify number of nucleotides (80 or 400)***")
             sys.exit()
 
-        num_NT = int(sys.argv[2])
+        flanking_seq = int(sys.argv[2])
 
-        if num_NT != 80 and num_NT != 400:
+        if flanking_seq != 80 and flanking_seq != 400:
             print("***Invalid number of nucleotides***")
             sys.exit()
 
-        build_dataset(num_NT)
+        build_dataset(flanking_seq)
 
         # Perform one-hot encoding on each split
-        one_hot_encode("train", num_NT)
-        one_hot_encode("dev", num_NT)
-        one_hot_encode("test", num_NT)
+        one_hot_encode("train", flanking_seq)
+        one_hot_encode("dev", flanking_seq)
+        one_hot_encode("test", flanking_seq)
     else:
         print("***Mode not recognized***")

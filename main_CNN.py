@@ -74,7 +74,7 @@ def train(device, flanking_seq):
         }
         
         logger.writerow(step_metrics)
-        # TODO: delete loss or not?
+        
         del loss
         cur_label_index += 1
         
@@ -123,7 +123,6 @@ def predict(device, flanking_seq, dev_or_test):
         loss = F.cross_entropy(logits, y)
         pred = torch.max(logits, 1)[1]
         predictions.append(pred.item())
-        # TODO: acc = soft_pred[y]?
         dev_acc = soft_pred[y]
         dev_loss = loss.item()
         
@@ -141,8 +140,7 @@ def predict(device, flanking_seq, dev_or_test):
             }
         
         logger.writerow(step_metrics)
-    
-        # TODO: delete loss or not?
+
         del loss
         cur_label_index += 1
               

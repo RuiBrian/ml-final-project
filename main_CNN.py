@@ -30,10 +30,7 @@ def train(device, flanking_seq):
 
     # Parameters
     LEARNING_RATE = 0.0001
-    # TODO: Ephocs not used
-    EPOCHS = 500000
     print(f"Learning rate: {LEARNING_RATE}")
-    print(f"Epochs: {EPOCHS}")
 
     # Initialize model and optimizer
     model = CNN(input_height=HEIGHT, input_width=WIDTH, n_classes=N_CLASSES)
@@ -196,8 +193,6 @@ if __name__ == "__main__":
         logger.writeheader()
         
         train(device, flanking_seq)
-        
-        print("Model trained \n Predicting dev set...")
         
         # Write logging model performance for dev set
         LOGFILEDEV = open(os.path.join(

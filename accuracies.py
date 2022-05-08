@@ -18,9 +18,22 @@ def simple_nn_accuracy(file):
     data = np.loadtxt(file, dtype=int, delimiter=",", skiprows=1)
     true = data[:, 1]
     pred = data[:, 2]
-    comparison = true == pred
+    comparison = (true == pred)
     accuracy = ((np.sum(comparison)) / comparison.size).astype(np.float64)
-    return accuracy
+    acc = dict()
+    classes = np.unique(true)
+    correct=0
+    for i in range(len(true)):
+        if true[i] == pred[i]:
+            correct+=1
+    print(correct/len(true))
+    # print(len(preds))
+    for i in classes:
+        temp_l = true[np.where(true == i)]
+        temp_preds = pred[np.where(true == i)]
+        temp_comp = temp_l == temp_preds
+        acc[i] = np.sum(temp_comp) / temp_comp.size
+    return accuracy,acc
 
 
 def simple_accuracy(truefile, predfile):
@@ -178,25 +191,22 @@ if __name__ == "__main__":
     if MODEL == "nnsplice":
         flanking = ["80", "400"]
         for f in flanking:
-            outputfile = f"output/{f}nt_merged_nn_preds_0.csv"
-            print(f"{outputfile} Accuracy is {simple_nn_accuracy(outputfile)}")
+            outputfile = f"output/{f}nt_merged_nn_preds1.csv" 
+            print(f"{outputfile} accuracy is {simple_nn_accuracy(outputfile)}")
             print(f"and PR-AUC = {nn_pr_auc(outputfile)}")
 
     elif MODEL == "ourmodel":
         
-        if len(sys.argv) >= 3:
+        if len(sys.argv) == 3:
             flanking = sys.argv[2]
         else:
             raise Exception("Flanking sequence must be 80 or 400")
-        dataset = "dev"
-        if len(sys.argv) == 4:
-            dataset = sys.argv[3]
         
-        truef = f"datasets/processed/{flanking}nt_{dataset}_labels.npy"
+        truef = f"datasets/processed/{flanking}nt_dev_labels.npy"
         classifiers = ["AdaBoost", "CNN", "SVM"]
         for c in classifiers:
-            predf = f"predictions/{flanking}nt_{c}_{dataset}_predictions.csv"
-            predf2 = f"predictions/{flanking}nt_{c}_{dataset}_softpredictions.csv"
+            predf = f"predictions/{flanking}nt_{c}_dev_predictions.csv"
+            predf2 = f"predictions/{flanking}nt_{c}_dev_softpredictions.csv"
             print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
             print(f"{predf2} pr-auc={pr_auc(truef,predf2,predf)}")
     else:

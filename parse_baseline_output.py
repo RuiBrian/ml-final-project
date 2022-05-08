@@ -108,9 +108,10 @@ def merge_nn_output(files, descriptor=""):
         writer.writerows(data)
     print(newfile)
 
+
 def make_spliceai_output(flanking):
-    files = os.listdir('predictions')
-    splicefiles = [ x for x in files if "spliceAI" in x and f"{flanking}" in x]
+    files = os.listdir("predictions")
+    splicefiles = [x for x in files if "spliceAI" in x and f"{flanking}" in x]
     headers = ["true label", "predicted label"]
     data = np.empty((0, 2), int)
     for f in splicefiles:
@@ -118,15 +119,17 @@ def make_spliceai_output(flanking):
             label = 1
         elif "acceptors" in f:
             label = 2
-        else :
-            return -1        
+        else:
+            return -1
         # print(f"{data} and {np.shape(data)}")
         # print(np.loadtxt(f, dtype=int,delimiter = ",",skiprows=1))
-        pred= label*np.loadtxt('predictions/'+f, dtype=int, delimiter=",", skiprows=1)
+        pred = label * np.loadtxt(
+            "predictions/" + f, dtype=int, delimiter=",", skiprows=1
+        )
         print(f)
-        true = np.repeat(label,len(pred))
-        cat = np.column_stack((true,pred))
-        data = np.append( data, cat, axis=0 )
+        true = np.repeat(label, len(pred))
+        cat = np.column_stack((true, pred))
+        data = np.append(data, cat, axis=0)
     suffix = 0
     newfile = f"output/{flanking}nt_spliceai_preds_{suffix}.csv"
     while os.path.exists(newfile):
@@ -137,6 +140,7 @@ def make_spliceai_output(flanking):
         writer.writerow(headers)
         writer.writerows(data)
     print(newfile)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

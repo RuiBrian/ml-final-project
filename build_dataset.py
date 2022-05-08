@@ -27,7 +27,9 @@ def one_hot_encode(file, flanking_seq):
     )
 
     sequences_df.to_csv(
-        f"datasets/processed/{flanking_seq}nt_{file}_separated.csv", header=None, index=False
+        f"datasets/processed/{flanking_seq}nt_{file}_separated.csv",
+        header=None,
+        index=False,
     )
 
     # Perform one-hot encoding with pd.get_dummies()
@@ -36,9 +38,12 @@ def one_hot_encode(file, flanking_seq):
     sequences_df = pd.get_dummies(sequences_df)
 
     # Convert to numpy arrays and save as .npy
-    np.save(f"datasets/processed/{flanking_seq}nt_{file}_labels.npy", labels_df.to_numpy())
     np.save(
-        f"datasets/processed/{flanking_seq}nt_{file}_encoded.npy", sequences_df.to_numpy()
+        f"datasets/processed/{flanking_seq}nt_{file}_labels.npy", labels_df.to_numpy()
+    )
+    np.save(
+        f"datasets/processed/{flanking_seq}nt_{file}_encoded.npy",
+        sequences_df.to_numpy(),
     )
 
 
@@ -97,9 +102,13 @@ def build_dataset(flanking_seq):
     print(f"Number of test examples: {test.shape[0]}")
 
     # Write to CSV files
-    train.to_csv(f"datasets/processed/{flanking_seq}nt_train.csv", header=None, index=False)
+    train.to_csv(
+        f"datasets/processed/{flanking_seq}nt_train.csv", header=None, index=False
+    )
     dev.to_csv(f"datasets/processed/{flanking_seq}nt_dev.csv", header=None, index=False)
-    test.to_csv(f"datasets/processed/{flanking_seq}nt_test.csv", header=None, index=False)
+    test.to_csv(
+        f"datasets/processed/{flanking_seq}nt_test.csv", header=None, index=False
+    )
 
 
 def nnsplice_dataset(

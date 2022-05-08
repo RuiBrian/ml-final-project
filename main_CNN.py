@@ -30,6 +30,7 @@ def train(device, flanking_seq):
 
     # Parameters
     LEARNING_RATE = 0.0001
+    # TODO: Ephocs not used
     EPOCHS = 500000
     print(f"Learning rate: {LEARNING_RATE}")
     print(f"Epochs: {EPOCHS}")
@@ -43,7 +44,7 @@ def train(device, flanking_seq):
     # Train the model
     s = torch.nn.Softmax(dim=1)
     cur_label_index = 0
-    for step in range(0, EPOCHS, HEIGHT):
+    for step in range(0, TRAIN_SEQUENCES.shape[0], HEIGHT):
         x = torch.from_numpy(
             TRAIN_SEQUENCES[step : step + HEIGHT].astype(np.float32)
             ).to(device)
@@ -73,8 +74,6 @@ def train(device, flanking_seq):
             'step': cur_label_index,
             'train_loss': train_loss,
             'train_acc': train_acc,
-            'dev_loss': [],
-            'dev_acc': []
         }
         
         logger.writerow(step_metrics)
@@ -83,6 +82,7 @@ def train(device, flanking_seq):
         cur_label_index += 1
         
     torch.save(model, f"models/{flanking_seq}nt_CNN.pt")
+    LOGFILETRAIN.close()
 
 
 def predict(device, flanking_seq, dev_or_test):
@@ -106,14 +106,6 @@ def predict(device, flanking_seq, dev_or_test):
     # Initialize predictions and soft_predictions
     predictions = []
     soft_predictions = []
-    
-    # TODO: overwrite csv log
-    # # Read log file to update dev_loss and dev_acc
-    # if dev_or_test == "dev":
-    #     with open(f"logs/{flanking_seq}nt_traindev_CNN.log", 'r+') as csvfile:
-    #         reader = csv.DictReader(csvfile)
-            
-    # rows = []
 
     s = torch.nn.Softmax(dim=1)
     cur_label_index = 0
@@ -134,26 +126,25 @@ def predict(device, flanking_seq, dev_or_test):
         loss = F.cross_entropy(logits, y)
         pred = torch.max(logits, 1)[1]
         predictions.append(pred.item())
+        # TODO: acc = soft_pred[y]?
         dev_acc = soft_pred[y]
         dev_loss = loss.item()
         
-        step_metrics = {
-            'dev_loss': dev_loss,
-            'dev_acc': dev_acc
-        }
-        
         if dev_or_test == "dev":
-            # TODO: overwrite csv log
-            # for row in reader:
-            #     row['dev_loss'] = dev_loss
-            #     row['dev_acc'] = dev_acc
-            #     rows.append(row)
-            
-            logger.writerow(step_metrics)
-
+            step_metrics = {
+                'step': cur_label_index,
+                'dev_loss': dev_loss,
+                'dev_acc': dev_acc,
+            }
         elif dev_or_test == "test":
-            logger.writerow(step_metrics)
-            
+            step_metrics = {
+                'step': cur_label_index,
+                'test_loss': dev_loss,
+                'test_acc': dev_acc,
+            }
+        
+        logger.writerow(step_metrics)
+    
         # TODO: delete loss or not?
         del loss
         cur_label_index += 1
@@ -161,14 +152,10 @@ def predict(device, flanking_seq, dev_or_test):
     predictions = np.array(predictions)
     soft_predictions = np.array(soft_predictions)
     
-    # TODO: overwrite csv log
-    # csvfile.seek(0)  # back to begining of the file.
-    # fieldnames = ['dev_loss', 'dev_acc']
-    # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    # writer.writeheader()
-    # writer.writerows(rows)
-    
-    LOGFILE.close()
+    if dev_or_test == "dev":
+        LOGFILEDEV.close()
+    elif dev_or_test == "test":
+        LOGFILETEST.close()
     
     # Save predictions and soft_predictions
     np.savetxt(
@@ -200,25 +187,35 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     if MODE == "train":
-        # Write logging model performance
-        LOGFILE = open(os.path.join(
-            f"logs/{flanking_seq}nt_traindev_CNN.log"), 'w'
+        # Write logging model performance for training set
+        LOGFILETRAIN = open(os.path.join(
+            f"logs/{flanking_seq}nt_train_CNN.log"), 'w'
             )
-        log_fieldnames = ['step', 'train_loss', 'train_acc', 
-                          'dev_loss', 'dev_acc']
-        logger = csv.DictWriter(LOGFILE, log_fieldnames)
+        log_fieldnames = ['step', 'train_loss', 'train_acc']
+        logger = csv.DictWriter(LOGFILETRAIN, log_fieldnames)
         logger.writeheader()
         
         train(device, flanking_seq)
+        
+        print("Model trained \n Predicting dev set...")
+        
+        # Write logging model performance for dev set
+        LOGFILEDEV = open(os.path.join(
+            f"logs/{flanking_seq}nt_dev_CNN.log"), 'w'
+            )
+        log_fieldnames = ['step', 'dev_loss', 'dev_acc']
+        logger = csv.DictWriter(LOGFILEDEV, log_fieldnames)
+        logger.writeheader()
+        
         predict(device, flanking_seq, "dev")
         
     elif MODE == "predict":
         # Write logging model performance
-        LOGFILE = open(os.path.join(
+        LOGFILETEST = open(os.path.join(
             f"logs/{flanking_seq}nt_test_CNN.log"), 'w'
             )
-        log_fieldnames = ['step', 'dev_loss', 'dev_acc']
-        logger = csv.DictWriter(LOGFILE, log_fieldnames)
+        log_fieldnames = ['step', 'test_loss', 'test_acc']
+        logger = csv.DictWriter(LOGFILETEST, log_fieldnames)
         logger.writeheader()
         
         predict(device, flanking_seq, "test")

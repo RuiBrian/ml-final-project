@@ -2,20 +2,27 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import sys
+import os
+import csv
 
 from model_CNN import CNN
 from sklearn import metrics
 
-
-def train(device, num_NT):
-    TRAIN_SEQUENCES = np.load(f"datasets/processed/{num_NT}nt_train_encoded.npy")
-    TRAIN_LABELS = np.load(f"datasets/processed/{num_NT}nt_train_labels.npy")
+def train(device, flanking_seq):
+    
+    # Load train dataset and labels
+    TRAIN_SEQUENCES = np.load(
+        f"datasets/processed/{flanking_seq}nt_train_encoded.npy"
+        )
+    TRAIN_LABELS = np.load(
+        f"datasets/processed/{flanking_seq}nt_train_labels.npy"
+        )
 
     # Number of gene sequences in the training corpus
     N_SEQUENCES = TRAIN_LABELS.shape[0]
 
     # Dimensions of a one-hot encoded sequence
-    HEIGHT = int(num_NT) + 2
+    HEIGHT = int(flanking_seq) + 2
     WIDTH = 4
 
     # Number of output classes
@@ -32,80 +39,189 @@ def train(device, num_NT):
     print(model)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-
+    
+    # Train the model
+    s = torch.nn.Softmax(dim=1)
     cur_label_index = 0
     for step in range(0, EPOCHS, HEIGHT):
         x = torch.from_numpy(
             TRAIN_SEQUENCES[step : step + HEIGHT].astype(np.float32)
-        ).to(device)
-        y = torch.from_numpy(TRAIN_LABELS[cur_label_index].astype(int)).to(device)
-        cur_label_index += 1
+            ).to(device)
+        y = torch.from_numpy(TRAIN_LABELS[cur_label_index].astype(int)
+            ).to(device)
 
         # Forward pass: get logits for x
         logits = model(x)
+        
+        # Compute soft prediction
+        soft_pred = s(logits).detach().cpu().numpy().flatten()
 
         # Compute loss
         loss = F.cross_entropy(logits, y)
 
-        # Zero gradients, perform a backward pass, and update the weights.
+        # Zero gradients, perform a backward pass, and update the weights
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        
+        # Compute accuracy and loss
+        y_hat = torch.max(logits, 1)[1]
+        train_acc = soft_pred[y]
+        train_loss = loss.item()
+        
+        step_metrics = {
+            'step': cur_label_index,
+            'train_loss': train_loss,
+            'train_acc': train_acc,
+            'dev_loss': [],
+            'dev_acc': []
+        }
+        
+        logger.writerow(step_metrics)
+        # TODO: delete loss or not?
+        del loss
+        cur_label_index += 1
+        
+    torch.save(model, f"models/{flanking_seq}nt_CNN.pt")
 
-    torch.save(model, f"models/{num_NT}nt_CNN.pt")
 
-
-def predict(device, num_NT):
-    DEV_SEQUENCES = np.load(f"datasets/processed/{num_NT}nt_dev_encoded.npy")
-    HEIGHT = int(num_NT) + 2
-    NUM_SEQUENCES = int(DEV_SEQUENCES.shape[0] / HEIGHT)
-
-    model = torch.load(f"models/{num_NT}nt_CNN.pt")
+def predict(device, flanking_seq, dev_or_test):
+    
+    # Predict on dev or test set
+    dev_or_test = dev_or_test
+    
+    # Load dataset and labels
+    DEV_SEQUENCES = np.load(
+        f"datasets/processed/{flanking_seq}nt_{dev_or_test}_encoded.npy")
+    DEV_LABELS = np.load(
+        f"datasets/processed/{flanking_seq}nt_{dev_or_test}_labels.npy")
+    
+    # Dimensions of a one-hot encoded sequence
+    HEIGHT = int(flanking_seq) + 2
+    
+    # Load the model
+    model = torch.load(f"models/{flanking_seq}nt_CNN.pt")
     model.to(device)
+    
+    # Initialize predictions and soft_predictions
     predictions = []
     soft_predictions = []
+    
+    # TODO: overwrite csv log
+    # # Read log file to update dev_loss and dev_acc
+    # if dev_or_test == "dev":
+    #     with open(f"logs/{flanking_seq}nt_traindev_CNN.log", 'r+') as csvfile:
+    #         reader = csv.DictReader(csvfile)
+            
+    # rows = []
 
     s = torch.nn.Softmax(dim=1)
+    cur_label_index = 0
     for i in range(0, DEV_SEQUENCES.shape[0], HEIGHT):
-        x = torch.from_numpy(DEV_SEQUENCES[i : i + HEIGHT].astype(np.float32)).to(
-            device
-        )
+        x = torch.from_numpy(DEV_SEQUENCES[i : i + HEIGHT].astype(np.float32)
+            ).to(device)
+        y = torch.from_numpy(DEV_LABELS[cur_label_index].astype(int)
+            ).to(device)
+        
+        # Forward pass: get logits for x
         logits = model(x)
-
-        pred = torch.max(logits, 1)[1]
+        
+        # Compute soft prediction for PR curve
         soft_pred = s(logits).detach().cpu().numpy().flatten()
-        predictions.append(pred.item())
         soft_predictions.append(soft_pred)
+        
+        # Compute accuracy and loss
+        loss = F.cross_entropy(logits, y)
+        pred = torch.max(logits, 1)[1]
+        predictions.append(pred.item())
+        dev_acc = soft_pred[y]
+        dev_loss = loss.item()
+        
+        step_metrics = {
+            'dev_loss': dev_loss,
+            'dev_acc': dev_acc
+        }
+        
+        if dev_or_test == "dev":
+            # TODO: overwrite csv log
+            # for row in reader:
+            #     row['dev_loss'] = dev_loss
+            #     row['dev_acc'] = dev_acc
+            #     rows.append(row)
+            
+            logger.writerow(step_metrics)
 
-    true_labels = np.load(f"datasets/processed/{num_NT}nt_dev_labels.npy").ravel()
+        elif dev_or_test == "test":
+            logger.writerow(step_metrics)
+            
+        # TODO: delete loss or not?
+        del loss
+        cur_label_index += 1
+              
     predictions = np.array(predictions)
     soft_predictions = np.array(soft_predictions)
-    np.savetxt(f"predictions/{num_NT}nt_CNN_dev_predictions.csv", predictions, fmt="%d")
+    
+    # TODO: overwrite csv log
+    # csvfile.seek(0)  # back to begining of the file.
+    # fieldnames = ['dev_loss', 'dev_acc']
+    # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    # writer.writeheader()
+    # writer.writerows(rows)
+    
+    LOGFILE.close()
+    
+    # Save predictions and soft_predictions
     np.savetxt(
-        f"predictions/{num_NT}nt_CNN_dev_softpredictions.csv",
+        f"predictions/{flanking_seq}nt_CNN_{dev_or_test}_predictions.csv", 
+        predictions, fmt="%d"
+        )
+    np.savetxt(
+        f"predictions/{flanking_seq}nt_CNN_{dev_or_test}_softpredictions.csv",
         soft_predictions,
         fmt="%f",
-    )
-    print(f"Accuracy: {metrics.accuracy_score(true_labels, predictions)}")
+        )
+    print(
+        f"Accuracy: {metrics.accuracy_score(DEV_LABELS.ravel(), predictions)}"
+        )
 
 
 if __name__ == "__main__":
     MODE = sys.argv[1]
 
     if len(sys.argv) == 3:
-        num_NT = int(sys.argv[2])
+        flanking_seq = int(sys.argv[2])
     elif len(sys.argv) == 2:
-        num_NT = 80
+        flanking_seq = 80
 
-    if num_NT != 80 and num_NT != 400:
+    if flanking_seq != 80 and flanking_seq != 400:
         raise Exception("Flanking sequence must be 80 or 400")
 
     # Use CUDA if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     if MODE == "train":
-        train(device, num_NT)
+        # Write logging model performance
+        LOGFILE = open(os.path.join(
+            f"logs/{flanking_seq}nt_traindev_CNN.log"), 'w'
+            )
+        log_fieldnames = ['step', 'train_loss', 'train_acc', 
+                          'dev_loss', 'dev_acc']
+        logger = csv.DictWriter(LOGFILE, log_fieldnames)
+        logger.writeheader()
+        
+        train(device, flanking_seq)
+        predict(device, flanking_seq, "dev")
+        
     elif MODE == "predict":
-        predict(device, num_NT)
+        # Write logging model performance
+        LOGFILE = open(os.path.join(
+            f"logs/{flanking_seq}nt_test_CNN.log"), 'w'
+            )
+        log_fieldnames = ['step', 'dev_loss', 'dev_acc']
+        logger = csv.DictWriter(LOGFILE, log_fieldnames)
+        logger.writeheader()
+        
+        predict(device, flanking_seq, "test")
+        
     else:
         raise Exception("Mode not recognized")

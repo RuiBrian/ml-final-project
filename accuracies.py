@@ -1,6 +1,5 @@
 from distutils.log import ERROR
 from typing import Dict
-from xml.etree.ElementPath import prepare_descendant
 import numpy as np
 import sys
 from sklearn.metrics import (
@@ -9,17 +8,10 @@ from sklearn.metrics import (
     average_precision_score,
     confusion_matrix,
 )
-from torchmetrics import PrecisionRecallCurve, AveragePrecision
-from torchmetrics.detection.mean_ap import MeanAveragePrecision
-
-# from torchmetrics.functional import auc
 from sklearn.preprocessing import label_binarize
-import torch
-import torch.nn.functional as F
-import torch.nn as nn
-from sklearn.preprocessing import OneHotEncoder
 import matplotlib.pyplot as plt
 import os
+import csv
 
 
 def simple_nn_accuracy(file):
@@ -27,16 +19,6 @@ def simple_nn_accuracy(file):
     true = data[:, 1]
     pred = data[:, 2]
     comparison = true == pred
-    # # NNsplice classifying it as both we decide to count correct, so adjust
-    # for i in range(len(pred)):
-    #     if pred[i] == 3:
-    #         if not true[i] == 0:
-    #             comparison[i] = True
-
-    # incorrect = np.where(true!=pred)
-    # print(len(incorrect[0]))
-    # print(len(true))
-    # accuracy = len(incorrect[0])/len(true)
     accuracy = ((np.sum(comparison)) / comparison.size).astype(np.float64)
     return accuracy
 
@@ -50,10 +32,9 @@ def simple_accuracy(truefile, predfile):
     comparison = labels == preds
     classes = np.unique(labels)
     acc = dict()
-    print(len(preds))
+    # print(len(preds))
     for i in classes:
         temp_l = labels[np.where(labels == i)]
-        print(f"class {i} {len(temp_l)}")
         temp_preds = preds[np.where(labels == i)]
         temp_comp = temp_l == temp_preds
         acc[i] = np.sum(temp_comp) / temp_comp.size
@@ -73,8 +54,10 @@ def nn_pr_auc(file):
     """
     data = np.loadtxt(file, dtype=int, delimiter=",", skiprows=1)
     classes = [0, 1, 2]
-    true = label_binarize(data[:, 1], classes=classes)
-    pred = label_binarize(data[:, 2], classes=classes)
+    true = data[:, 1]
+    bintrue = label_binarize(true, classes=classes)
+    pred = data[:, 2]
+    binpred = label_binarize(pred, classes=classes)
     # for i in range(len(pred)):
     #     if pred[i] == 3:
     #         if not true[i] == 0:
@@ -84,11 +67,11 @@ def nn_pr_auc(file):
     threshold = dict()
     accuracies = dict()
     accuracies = []
-    print(confusion_matrix(true, pred, labels=classes))
+    cm = confusion_matrix(true, pred, labels=classes)
     plt.axis()
     for i in range(len(classes)):
         precision[i], recall[i], threshold[i] = precision_recall_curve(
-            true[:, i], pred[:, i]
+            bintrue[:, i], binpred[:, i]
         )
         plt.plot(recall[i], precision[i], label=f"class {i}")
         accuracies.append(auc(recall[i], precision[i]))
@@ -98,16 +81,16 @@ def nn_pr_auc(file):
     figname = os.path.splitext(file)[0]
     plt.xlabel("Recall")
     plt.ylabel("Precision")
-    plt.title(figname + "_" + str(accuracy))
+    plt.title(figname + " " + str(accuracy))
     plt.savefig(figname + ".png")
     plt.show()
     # # print(accuracies)
-    print(threshold)
-    print(recall)
-    print(precision)
+    # print(threshold)
+    # print(recall)
+    # print(precision)
     # precision, recall, thresholds = precision_recall_curve(true, pred)
     # accuracy = auc(precision, recall)
-    return accuracy
+    return accuracy,cm
 
 
 def pr_auc(truefile, probfile, predfile):
@@ -133,12 +116,8 @@ def pr_auc(truefile, probfile, predfile):
     accuracies = []
     plt.axis()
     # *** double check softpredictions match predictions - they do!
-    print(confusion_matrix(labels, preds, labels=classes))
+    cm = confusion_matrix(labels, preds, labels=classes)
 
-    # double check 99% canonical in dataset - want to be useful for noncanonical and not be trivial
-    # try on just acceptor and donor with 99% canonical
-    # double check feature importance in SVM
-    # write up what you've ruled out
     for i in range(len(classes)):
         temp = binlabels[:, i]
         precision[i], recall[i], threshold[i] = precision_recall_curve(
@@ -167,7 +146,7 @@ def pr_auc(truefile, probfile, predfile):
     #     f"Num thresholds for each class is {len(threshold[0])}. "
     #     f"Num precision for each class is {len(precision[0])}")
 
-    return accuracy
+    return accuracy, cm
 
 
 def nn_top_k_accuracy(file):
@@ -191,8 +170,8 @@ def top_k_accuracy(truefile, predfile):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("***Please provide model being assessed***")
+    if len(sys.argv) < 3:
+        print("***Please provide model being assessed and flanking length***")
         sys.exit()
 
     MODEL = sys.argv[1]
@@ -205,16 +184,19 @@ if __name__ == "__main__":
 
     elif MODEL == "ourmodel":
         
-        if len(sys.argv) == 3:
+        if len(sys.argv) >= 3:
             flanking = sys.argv[2]
         else:
             raise Exception("Flanking sequence must be 80 or 400")
+        dataset = "dev"
+        if len(sys.argv) == 4:
+            dataset = sys.argv[3]
         
-        truef = f"datasets/processed/{flanking}nt_dev_labels.npy"
+        truef = f"datasets/processed/{flanking}nt_{dataset}_labels.npy"
         classifiers = ["AdaBoost", "CNN", "SVM"]
         for c in classifiers:
-            predf = f"predictions/{flanking}nt_{c}_dev_predictions.csv"
-            predf2 = f"predictions/{flanking}nt_{c}_dev_softpredictions.csv"
+            predf = f"predictions/{flanking}nt_{c}_{dataset}_predictions.csv"
+            predf2 = f"predictions/{flanking}nt_{c}_{dataset}_softpredictions.csv"
             print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
             print(f"{predf2} pr-auc={pr_auc(truef,predf2,predf)}")
     else:

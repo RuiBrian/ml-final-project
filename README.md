@@ -38,7 +38,7 @@ Prepare dataset for NNsplice:
 $ python build_dataset.py nnsplice
 ```
 
-Run model: Copy and paste 1000 sequences to the website and submit. Save the HTML file.
+Run model: Copy and paste 1000 80nt sequences (or 230 400nt sequences) to the website and submit. Save the HTML file tp the output folder.
 
 Scrape NNSplice output:
 ```shell
@@ -47,21 +47,21 @@ $ python parse_baseline_output.py nnsplice [flanking sequence length]
 
 Compute accuracy:
 ```shell
-$ python accuracies.py nnsplice path_to_output.csv[default=output/merged_nn_preds0.csv]
+$ python accuracies.py nnsplice path_to_output.csv[default=output/merged_nn_preds0.csv] [80 or 400]
 ```
 
 ## CNN model
 
-Train the model and predict on dev dataset:
+Train the model:
 
 ```shell
-$ python main_CNN.py train flanking_seq[default=80]
+$ python main_CNN.py train num_NT[default=80]
 ```
 
-Predict on test dataset:
+Predict with the model:
 
 ```shell
-$ python main_CNN.py predict flanking_seq[default=80]
+$ python main_CNN.py predict num_NT[default=80] 
 ```
 
 Build dataset:
@@ -74,7 +74,7 @@ $ python build_dataset.py
 Fit and predict:
 
 ```shell
-$ python main_SVM.py flanking_seq[default=80]
+$ python main_SVM.py num_NT[default=80]
 ```
 
 ## AdaBoost
@@ -83,7 +83,7 @@ $ python main_SVM.py flanking_seq[default=80]
 Fit and predict:
 
 ```shell
-$ python main_AdaBoost.py flanking_seq[default=80]
+$ python main_AdaBoost.py num_NT[default=80] dataset[default=dev]
 ```
 
 ## Compute Accuracy

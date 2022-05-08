@@ -23,10 +23,10 @@ def simple_nn_accuracy(file):
     acc = dict()
     classes = np.unique(true)
     correct=0
-    for i in range(len(true)):
-        if true[i] == pred[i]:
-            correct+=1
-    print(correct/len(true))
+    # for i in range(len(true)):
+    #     if true[i] == pred[i]:
+    #         correct+=1
+    # print(correct/len(true))
     # print(len(preds))
     for i in classes:
         temp_l = true[np.where(true == i)]
@@ -35,6 +35,26 @@ def simple_nn_accuracy(file):
         acc[i] = np.sum(temp_comp) / temp_comp.size
     return accuracy,acc
 
+def simple_sa_accuracy(file):
+    data = np.loadtxt(file, dtype=int, delimiter=",", skiprows=1)
+    true = data[:, 0]
+    pred = data[:, 1]
+    comparison = (true == pred)
+    accuracy = ((np.sum(comparison)) / comparison.size).astype(np.float64)
+    acc = dict()
+    classes = np.unique(true)
+    correct=0
+    # for i in range(len(true)):
+    #     if true[i] == pred[i]:
+    #         correct+=1
+    # print(correct/len(true))
+    # print(len(preds))
+    for i in classes:
+        temp_l = true[np.where(true == i)]
+        temp_preds = pred[np.where(true == i)]
+        temp_comp = temp_l == temp_preds
+        acc[i] = np.sum(temp_comp) / temp_comp.size
+    return accuracy,acc
 
 def simple_accuracy(truefile, predfile):
     labels = np.load(truefile).squeeze()
@@ -209,5 +229,9 @@ if __name__ == "__main__":
             predf2 = f"predictions/{flanking}nt_{c}_dev_softpredictions.csv"
             print(f"{predf} simple accuracy={simple_accuracy(truef,predf)}")
             print(f"{predf2} pr-auc={pr_auc(truef,predf2,predf)}")
-    else:
-        print("*** no valid model given ***")
+    elif MODEL == 'spliceai':
+        if len(sys.argv) == 3:
+            flanking = sys.argv[2]
+        else:
+            raise Exception("Flanking sequence must be 80 or 400")
+        print(f"acc: {simple_sa_accuracy(f'output/{flanking}nt_spliceai_preds_0.csv')}")

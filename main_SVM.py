@@ -44,6 +44,7 @@ def fit_predict(flanking_seq, dataset):
 
     # Plot learning curve
     plot_learning_curve(clf, f"SVM Learning Curves {flanking_seq}nt", X_train, y_train)
+    plt.figure(figsize=(15, 5))
     plt.savefig(f"logs/{flanking_seq}nt_traindev_SVM.png")
     # plt.show()
 

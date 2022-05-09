@@ -37,6 +37,7 @@ def fit_predict(flanking_seq, datatype="dev"):
     
     # Plot learning curve
     plot_learning_curve(clf, f"AdaBoost Learning Curves {flanking_seq}nt", X_train, y_train)
+    plt.figure(figsize=(15, 5))
     plt.savefig(f"logs/{flanking_seq}nt_traindev_AdaBoost.png")
     # plt.show()
 

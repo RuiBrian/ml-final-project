@@ -5,7 +5,7 @@ import numpy as np
 import csv
 from bs4 import BeautifulSoup
 
-# TODO make output just predicted coumn
+
 def parse_nn_html(file):
     """
     0 = neither
@@ -31,7 +31,6 @@ def parse_nn_html(file):
     HTMLFile = open(file, "r")
     index = HTMLFile.read()
     Parse = BeautifulSoup(index, "html.parser")
-    ## ***** this is literally so shitty wtf improve this *****
     preelements = Parse.find_all("pre")
     empty_label_len_donor = len("Start   End    Score     Exon   Intron")
     empty_label_len_acceptor = len("Start   End    Score     Intron               Exon")

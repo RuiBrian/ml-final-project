@@ -43,8 +43,9 @@ def fit_predict(flanking_seq,dataset):
     y_softpred = calibrated_clf.predict_proba(X_dev)
     
     # Plot learning curve
-    plot_learning_curve(clf, "SVM Learning Curves {flanking_seq}nt", X_train, y_train)
-    plt.show()
+    plot_learning_curve(clf, f"SVM Learning Curves {flanking_seq}nt", X_train, y_train)
+    plt.savefig(f"logs/{flanking_seq}nt_traindev_SVM.png")
+    # plt.show()
 
     # Save predictions and print accuracy
     np.savetxt(
@@ -64,7 +65,6 @@ def plot_learning_curve(estimator, title, X, y,
     axes=None,
     ylim=None,
     cv=None,
-    n_jobs=None,
     train_sizes=np.linspace(0.1, 1.0, 5),
     ):
     

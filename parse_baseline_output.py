@@ -11,7 +11,7 @@ def parse_nn_html(file):
     0 = neither
     1 = donor
     2 = acceptor
-    3 = both
+    3 = both # now classifying both as donor or acceptor (whichever is correct)
     """
     oldpath = os.getcwd()
     os.chdir("output")
@@ -95,42 +95,80 @@ def merge_nn_output(files, descriptor=""):
         )
     # print(np.shape(data))
     suffix = 0
-    descriptor = descriptor + "_"
+    if descriptor != "":
+        descriptor = descriptor + "nt_"
+    print(descriptor)
     newfile = f"output/{descriptor}merged_nn_preds_{suffix}.csv"
     while os.path.exists(newfile):
         suffix += 1
-        newfile = f"output/merged_nn_preds{suffix}.csv"
+        newfile = f"output/{descriptor}merged_nn_preds{suffix}.csv"
     with open(newfile, "w") as f:
         writer = csv.writer(f, lineterminator="\n")
         writer.writerow(headers)
         writer.writerows(data)
+    print(newfile)
+
+
+def make_spliceai_output(flanking):
+    files = os.listdir("predictions")
+    splicefiles = [x for x in files if "spliceAI" in x and f"{flanking}" in x]
+    headers = ["true label", "predicted label"]
+    data = np.empty((0, 2), int)
+    for f in splicefiles:
+        if "donors" in f:
+            label = 1
+        elif "acceptors" in f:
+            label = 2
+        else:
+            return -1
+        # print(f"{data} and {np.shape(data)}")
+        # print(np.loadtxt(f, dtype=int,delimiter = ",",skiprows=1))
+        pred = label * np.loadtxt(
+            "predictions/" + f, dtype=int, delimiter=",", skiprows=1
+        )
+        print(f)
+        true = np.repeat(label, len(pred))
+        cat = np.column_stack((true, pred))
+        data = np.append(data, cat, axis=0)
+    suffix = 0
+    newfile = f"output/{flanking}nt_spliceai_preds_{suffix}.csv"
+    while os.path.exists(newfile):
+        suffix += 1
+        newfile = f"output/{flanking}nt_spliceai_preds_{suffix}.csv"
+    with open(newfile, "w") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(headers)
+        writer.writerows(data)
+    print(newfile)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("***Please specify baseline (nnsplice or spliceai)***")
+        sys.exit()
+    if len(sys.argv) < 3:
+        print("*** input flanking sequence length ***")
+        sys.exit()
     BASELINE = sys.argv[1]
+    des = sys.argv[2]
     if BASELINE == "nnsplice":
-        if len(sys.argv) < 3:
-            print("*** input flanking sequence length ***")
-            sys.exit()
-        else:
-            des = sys.argv[2]
-            if len(sys.argv) == 4:
-                hfile = sys.argv[3]
-                if ".csv" not in hfile:
-                    parse_nn_html(hfile)
-                else:
-                    print("invalid raw output given (must be html)")
+        if len(sys.argv) == 4:
+            hfile = sys.argv[3]
+            if ".csv" not in hfile:
+                parse_nn_html(hfile)
             else:
-                hfiles = os.listdir("output")
-                parsed = []
-                for h in hfiles:
-                    if "nnsplice_" in h and des in h and ".csv" not in h:
-                        parsed.append("output/" + parse_nn_html(h))
-                # print(parsed)
-                # merge into one file
-                merge_nn_output(parsed, descriptor=des)
+                print("invalid raw output given (must be html)")
+        else:
+            hfiles = os.listdir("output")
+            parsed = []
+            for h in hfiles:
+                if "nnsplice_" in h and des in h and ".csv" not in h:
+                    parsed.append("output/" + parse_nn_html(h))
+            # print(parsed)
+            # merge into one file
+            # print(des)
+            merge_nn_output(parsed, descriptor=des)
 
     elif BASELINE == "spliceai":
-        print("this doesn't do anything")
+        make_spliceai_output(des)
+        # print("this doesn't do anything")

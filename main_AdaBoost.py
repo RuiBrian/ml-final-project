@@ -8,7 +8,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.model_selection import learning_curve
 
 
-def fit_predict(flanking_seq,datatype="dev"):
+def fit_predict(flanking_seq, datatype="dev"):
     # Load training data and labels
     X_train = pd.read_csv(
         f"datasets/processed/{flanking_seq}nt_train_separated.csv",
@@ -21,11 +21,15 @@ def fit_predict(flanking_seq,datatype="dev"):
 
     # Load dev data and labels
     X_dev = pd.read_csv(
-        f"datasets/processed/{flanking_seq}nt_{datatype}_separated.csv", header=None, index_col=False
+        f"datasets/processed/{flanking_seq}nt_{datatype}_separated.csv",
+        header=None,
+        index_col=False,
     )
     X_dev = X_dev.to_numpy()
     X_dev = OneHotEncoder().fit_transform(X_dev).astype(int).toarray()
-    y_dev = np.load(f"datasets/processed/{flanking_seq}nt_{datatype}_labels.npy").ravel()
+    y_dev = np.load(
+        f"datasets/processed/{flanking_seq}nt_{datatype}_labels.npy"
+    ).ravel()
 
     # Fit AdaBoost classifier
     clf = AdaBoostClassifier(n_estimators=100, random_state=0)
@@ -134,11 +138,11 @@ def plot_learning_curve(estimator, title, X, y,
 
 if __name__ == "__main__":
     flanking_seq = 80
-    datatype = 'dev'
+    datatype = "dev"
 
     if len(sys.argv) >= 2:
         flanking_seq = int(sys.argv[1])
         if len(sys.argv) == 3:
-            datatype=sys.argv[2]
+            datatype = sys.argv[2]
 
     fit_predict(flanking_seq, datatype)

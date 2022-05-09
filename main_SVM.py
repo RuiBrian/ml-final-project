@@ -11,7 +11,7 @@ from sklearn.calibration import CalibratedClassifierCV
 from sklearn.model_selection import learning_curve
 
 
-def fit_predict(flanking_seq,dataset):
+def fit_predict(flanking_seq, dataset):
     # Load training data and labels
     X_train = pd.read_csv(
         f"datasets/processed/{flanking_seq}nt_train_separated.csv",
@@ -41,7 +41,7 @@ def fit_predict(flanking_seq,dataset):
 
     y_pred = clf.predict(X_dev)
     y_softpred = calibrated_clf.predict_proba(X_dev)
-    
+
     # Plot learning curve
     plot_learning_curve(clf, f"SVM Learning Curves {flanking_seq}nt", X_train, y_train)
     plt.savefig(f"logs/{flanking_seq}nt_traindev_SVM.png")
@@ -61,13 +61,17 @@ def fit_predict(flanking_seq,dataset):
     print(f"Accuracy: {metrics.accuracy_score(y_dev, y_pred)}")
 
 
-def plot_learning_curve(estimator, title, X, y,
+def plot_learning_curve(
+    estimator,
+    title,
+    X,
+    y,
     axes=None,
     ylim=None,
     cv=None,
     train_sizes=np.linspace(0.1, 1.0, 5),
-    ):
-    
+):
+
     if axes is None:
         _, axes = plt.subplots(1, 3, figsize=(20, 5))
 
@@ -78,7 +82,13 @@ def plot_learning_curve(estimator, title, X, y,
     axes[0].set_ylabel("Score")
 
     train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
-        estimator, X, y, cv=cv, train_sizes=train_sizes, return_times=True,)
+        estimator,
+        X,
+        y,
+        cv=cv,
+        train_sizes=train_sizes,
+        return_times=True,
+    )
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
@@ -145,11 +155,11 @@ def plot_learning_curve(estimator, title, X, y,
 
 if __name__ == "__main__":
     flanking_seq = 80
-    datatype = 'dev'
+    datatype = "dev"
 
     if len(sys.argv) >= 2:
         flanking_seq = int(sys.argv[1])
         if len(sys.argv) == 3:
-            datatype=sys.argv[2]
+            datatype = sys.argv[2]
 
-    fit_predict(flanking_seq,datatype)
+    fit_predict(flanking_seq, datatype)

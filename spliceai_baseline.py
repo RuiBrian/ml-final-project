@@ -1,6 +1,6 @@
-#need to install following to run
-#pip install spliceAi 
-#pip install tensorflow 
+# need to install following to run
+# pip install spliceAi
+# pip install tensorflow
 
 from keras.models import load_model
 from pkg_resources import resource_filename
@@ -8,12 +8,10 @@ from spliceai.utils import one_hot_encode
 import numpy as np
 
 
-
-
 # set whether file is donor sequences (True) or acceptor (False)
 def calc_acc(file, is_donor):
     seqs = []
-    with open(file, 'r') as f:
+    with open(file, "r") as f:
         for line in f:
             seqs.append(line.strip())
 
@@ -27,15 +25,18 @@ def calc_acc(file, is_donor):
         input_sequence = s
         # Replace this with your custom sequence
         context = 10000
-        paths = ('models/spliceai{}.h5'.format(x) for x in range(1, 6))
-        models = [load_model(resource_filename('spliceai', x), compile=False) for x in paths]
-        x = one_hot_encode('N' * (context // 2) + input_sequence + 'N' * (context // 2))[None, :]
+        paths = ("models/spliceai{}.h5".format(x) for x in range(1, 6))
+        models = [
+            load_model(resource_filename("spliceai", x), compile=False) for x in paths
+        ]
+        x = one_hot_encode(
+            "N" * (context // 2) + input_sequence + "N" * (context // 2)
+        )[None, :]
         y = np.mean([models[m].predict(x) for m in range(5)], axis=0)
 
         acceptor_prob = y[0, :, 1]
         donor_prob = y[0, :, 2]
         neither_prob = y[0, :, 0]
-
 
         amax = np.where(acceptor_prob == np.max(acceptor_prob))[0][0]
 

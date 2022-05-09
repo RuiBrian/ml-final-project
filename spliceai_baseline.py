@@ -1,3 +1,7 @@
+#need to install following to run
+#pip install spliceAi 
+#pip install tensorflow 
+
 from keras.models import load_model
 from pkg_resources import resource_filename
 from spliceai.utils import one_hot_encode

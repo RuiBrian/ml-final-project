@@ -67,7 +67,7 @@ def plot_learning_curve(
     X,
     y,
 ):
-    
+
     plt.figure(figsize=(15, 5))
     plt.title(title)
     plt.xlabel("Training examples")
@@ -100,9 +100,7 @@ def plot_learning_curve(
         alpha=0.1,
         color="r",
     )
-    plt.plot(
-        train_sizes, train_scores_mean, "o-", color="b", label="Training score"
-    )
+    plt.plot(train_sizes, train_scores_mean, "o-", color="b", label="Training score")
     plt.plot(
         train_sizes, test_scores_mean, "o-", color="r", label="Cross-validation score"
     )

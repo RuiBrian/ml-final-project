@@ -121,35 +121,35 @@ def plot_learning_curve(
     )
     axes[0].legend(loc="best")
 
-    # Plot n_samples vs fit_times
-    axes[1].grid()
-    axes[1].plot(train_sizes, fit_times_mean, "o-")
-    axes[1].fill_between(
-        train_sizes,
-        fit_times_mean - fit_times_std,
-        fit_times_mean + fit_times_std,
-        alpha=0.1,
-    )
-    axes[1].set_xlabel("Training examples")
-    axes[1].set_ylabel("fit_times")
-    axes[1].set_title("Scalability of the model")
+    # # Plot n_samples vs fit_times
+    # axes[1].grid()
+    # axes[1].plot(train_sizes, fit_times_mean, "o-")
+    # axes[1].fill_between(
+    #     train_sizes,
+    #     fit_times_mean - fit_times_std,
+    #     fit_times_mean + fit_times_std,
+    #     alpha=0.1,
+    # )
+    # axes[1].set_xlabel("Training examples")
+    # axes[1].set_ylabel("fit_times")
+    # axes[1].set_title("Scalability of the model")
 
-    # Plot fit_time vs score
-    fit_time_argsort = fit_times_mean.argsort()
-    fit_time_sorted = fit_times_mean[fit_time_argsort]
-    test_scores_mean_sorted = test_scores_mean[fit_time_argsort]
-    test_scores_std_sorted = test_scores_std[fit_time_argsort]
-    axes[2].grid()
-    axes[2].plot(fit_time_sorted, test_scores_mean_sorted, "o-")
-    axes[2].fill_between(
-        fit_time_sorted,
-        test_scores_mean_sorted - test_scores_std_sorted,
-        test_scores_mean_sorted + test_scores_std_sorted,
-        alpha=0.1,
-    )
-    axes[2].set_xlabel("fit_times")
-    axes[2].set_ylabel("Score")
-    axes[2].set_title("Performance of the model")
+    # # Plot fit_time vs score
+    # fit_time_argsort = fit_times_mean.argsort()
+    # fit_time_sorted = fit_times_mean[fit_time_argsort]
+    # test_scores_mean_sorted = test_scores_mean[fit_time_argsort]
+    # test_scores_std_sorted = test_scores_std[fit_time_argsort]
+    # axes[2].grid()
+    # axes[2].plot(fit_time_sorted, test_scores_mean_sorted, "o-")
+    # axes[2].fill_between(
+    #     fit_time_sorted,
+    #     test_scores_mean_sorted - test_scores_std_sorted,
+    #     test_scores_mean_sorted + test_scores_std_sorted,
+    #     alpha=0.1,
+    # )
+    # axes[2].set_xlabel("fit_times")
+    # axes[2].set_ylabel("Score")
+    # axes[2].set_title("Performance of the model")
 
     return plt
 

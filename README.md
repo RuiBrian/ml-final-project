@@ -42,12 +42,12 @@ Run model: Copy and paste 1000 80nt sequences (or 230 400nt sequences) to the we
 
 Scrape NNSplice output:
 ```shell
-$ python parse_baseline_output.py nnsplice [flanking sequence length]
+$ python parse_baseline_output.py nnsplice <flanking sequence length>
 ```
 
 Compute accuracy:
 ```shell
-$ python accuracies.py nnsplice path_to_output.csv[default=output/merged_nn_preds0.csv] [80 or 400]
+$ python accuracies.py nnsplice <path_to_output.csv[default=output/merged_nn_preds0.csv]> <flanking_seq [80 or 400]>
 ```
 
 ## CNN model
@@ -55,18 +55,13 @@ $ python accuracies.py nnsplice path_to_output.csv[default=output/merged_nn_pred
 Train the model:
 
 ```shell
-$ python main_CNN.py train flanking_seq[default=80]
+$ python main_CNN.py train <flanking_seq [80 or 400]>
 ```
 
 Predict with the model:
 
 ```shell
-$ python main_CNN.py predict flanking_seq[default=80] 
-```
-
-Build dataset:
-```shell
-$ python build_dataset.py
+$ python main_CNN.py predict <flanking_seq [80 or 400]>
 ```
 
 ## SVM
@@ -74,7 +69,7 @@ $ python build_dataset.py
 Fit and predict:
 
 ```shell
-$ python main_SVM.py flanking_seq[default=80]
+$ python main_SVM.py <flanking_seq [80 or 400]>
 ```
 
 ## AdaBoost
@@ -83,11 +78,11 @@ $ python main_SVM.py flanking_seq[default=80]
 Fit and predict:
 
 ```shell
-$ python main_AdaBoost.py flanking_seq[default=80] dataset[default=dev]
+$ python main_AdaBoost.py <flanking_seq [80 or 400]> <dataset [default=dev]>
 ```
 
 ## Compute Accuracy
 
 ```shell
-$ python accuracies.py [nnsplice or ourmodel] [80 or 400]
+$ python accuracies.py <nnsplice or ourmodel> <flanking_seq [80 or 400]>
 ```
